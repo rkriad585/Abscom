@@ -10,8 +10,11 @@ inc = include_directories('include')
 
 cc = meson.get_compiler('c')
 ws_deps = []
+math_deps = []
 if ['windows', 'cygwin'].contains(host_machine.system())
   ws_deps += cc.find_library('ws2_32')
+else
+  math_deps = [cc.find_library('m', required: false)]
 endif
 
 srcs = files(
@@ -26,7 +29,7 @@ srcs = files(
 
 abscom_lib = both_libraries('abscom', srcs,
   include_directories: inc,
-  dependencies: ws_deps,
+  dependencies: ws_deps + math_deps,
   c_args: ['-DAC_BUILDING_LIBRARY'],
   version: meson.project_version(),
   install: true)
@@ -34,7 +37,7 @@ abscom_lib = both_libraries('abscom', srcs,
 abscom_dep = declare_dependency(
   include_directories: inc,
   link_with: abscom_lib.get_static_lib(),
-  dependencies: ws_deps,
+  dependencies: ws_deps + math_deps,
 )
 
 install_headers(
