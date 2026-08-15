@@ -1,0 +1,17 @@
+# Auto-detect text files and normalize line endings.
+* text=auto
+
+# Sources and text files use LF on commit.
+*.c text eol=lf
+*.h text eol=lf
+*.md text eol=lf
+meson.build text eol=lf
+*.toml text eol=lf
+
+# Binaries and archives.
+*.a binary
+*.lib binary
+*.dll binary
+*.exe binary
+*.png binary
+*.svg text eol=lf

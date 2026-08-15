@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title desc">
+  <title id="title">Abscom logo</title>
+  <desc id="desc">Curly braces containing a dot, representing the data containers and Python-like runtime of the Abscom C library.</desc>
+
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="#4F46E5"/>
+
+  <g fill="none" stroke="#FBBF24" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 220 138
+             C 188 138, 168 152, 168 178
+             C 168 210, 168 218, 152 226
+             C 148 228, 146 232, 146 238
+             C 146 246, 150 250, 156 254
+             C 160 256, 160 256, 156 258
+             C 150 262, 146 266, 146 274
+             C 146 280, 148 284, 152 286
+             C 168 294, 168 302, 168 334
+             C 168 360, 188 374, 220 374"/>
+    <path d="M 292 138
+             C 324 138, 344 152, 344 178
+             C 344 210, 344 218, 360 226
+             C 364 228, 366 232, 366 238
+             C 366 246, 362 250, 356 254
+             C 352 256, 352 256, 356 258
+             C 362 262, 366 266, 366 274
+             C 366 280, 364 284, 360 286
+             C 344 294, 344 302, 344 334
+             C 344 360, 324 374, 292 374"/>
+  </g>
+
+  <circle cx="256" cy="256" r="22" fill="#FBBF24"/>
+</svg>

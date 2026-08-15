@@ -1,0 +1,101 @@
+name: Build & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build and release from (create the tag first)'
+        required: false
+        default: 'v0.1.0'
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.os }} (${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+          - os: windows-latest
+            arch: x86_64
+          - os: windows-11-arm
+            arch: arm64
+          - os: macos-latest
+            arch: arm64
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Meson & Ninja
+        run: python -m pip install --upgrade pip meson ninja
+
+      - name: Configure
+        run: meson setup build --buildtype=release --prefix /
+
+      - name: Compile
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build
+
+      - name: Stage install
+        shell: bash
+        run: |
+          set -euo pipefail
+          WS="${{ github.workspace }}"
+          WS="${WS//\\//}"
+          meson install -C build --destdir "$WS/stage"
+
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          OS_ID="${{ runner.os }}"
+          OS_ID="${OS_ID,,}"
+          ARCH_ID="${{ matrix.arch }}"
+          if [ "$OS_ID" = "windows" ]; then
+            powershell -NoProfile -ExecutionPolicy Bypass -Command \
+              "Compress-Archive -Path 'stage/include','stage/lib','stage/bin' -DestinationPath 'abscom-$OS_ID-$ARCH_ID.zip' -Force"
+          else
+            tar -czf "abscom-$OS_ID-$ARCH_ID.tar.gz" -C stage include lib
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: abscom-${{ runner.os }}-${{ matrix.arch }}
+          path: abscom-*
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.tag != '')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download assets
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true

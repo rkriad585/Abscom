@@ -1,0 +1,20 @@
+# Project files
+build/
+builddir/
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.a
+.vs/
+demo_output.txt
+
+# VCS metadata
+.git/
+
+# Editor/OS files
+*.swp
+*~
+.DS_Store
+Thumbs.db
