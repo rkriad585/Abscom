@@ -50,9 +50,9 @@ Pull requests should:
 ## Style Guide
 
 - C11, no third-party dependencies.
-- Core functions: `ac_<module>_<verb>` naming; return `0` on success, non-zero on failure.
-- `ac_py` functions use short Python-like names and signal errors with `ABS_ERROR` objects.
-- Keep headers self-contained; each includes `ac_common.h` first.
+- Core functions: `abs_<module>_<verb>` naming; return `0` on success, non-zero on failure.
+- Runtime functions use short Python-like names and signal errors with `ABS_ERROR` objects.
+- Keep headers self-contained; each includes `abs_common.h` first.
 - Match the existing 4-space indentation used in `src/` and `include/`.
 
 ## Testing
@@ -66,16 +66,16 @@ meson test -C build
 Run one test:
 
 ```sh
-meson test -C build test_py
+meson test -C build test_abs
 ```
 
-Add coverage for new `ac_py` behavior to `tests/test_py.c`, and for core modules to the matching `tests/test_*.c` file. See [docs/development.md](docs/development.md).
+Add coverage for new runtime behavior to `tests/test_abs.c`, and for core modules to the matching `tests/test_*.c` file. See [docs/development.md](docs/development.md).
 
 ## Reporting Issues
 
 - Use the GitHub issue tracker.
 - Include: the version (from `.version`), your OS and toolchain, the exact commands that failed, and expected vs. actual output.
-- If it is a bug in `ac_py`, include a minimal reproduction program.
+- If it is a bug in the runtime, include a minimal reproduction program.
 
 Thank you for helping make Abscom better!
 

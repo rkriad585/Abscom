@@ -1,5 +1,5 @@
 site_name: Abscom
-site_description: A C11 library of reusable data structures and a Python-inspired dynamic runtime (ac_py)
+site_description: A C11 library of reusable data structures and a Python-inspired dynamic runtime
 site_url: https://rkriad585.github.io/Abscom/
 repo_url: https://github.com/rkriad585/Abscom
 repo_name: rkriad585/Abscom
@@ -45,8 +45,34 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Installation: installation.md
-  - Usage: usage.md
-  - API Reference: api.md
+  - Core Library:
+      - Common Macros: common-macros.md
+      - Dynamic Arrays: dynamic-arrays.md
+      - Strings: strings.md
+      - Hashing: hashing.md
+      - Hash Maps: hash-maps.md
+      - Time: time.md
+      - File I/O: file-io.md
+  - Runtime:
+      - Lifecycle: lifecycle.md
+      - Literals and Constructors: literals-and-constructors.md
+      - Types and Conversions: types-and-conversions.md
+      - Lists and Ranges: lists-and-ranges.md
+      - Loops: loops.md
+      - Dictionaries: dictionaries.md
+      - Sets: sets.md
+      - String Methods: string-methods.md
+      - Formatting and Printing: formatting.md
+      - JSON: json.md
+      - Functional Helpers: functional-helpers.md
+      - Random Utilities: random-utilities.md
+      - Math and Aggregates: math-and-aggregates.md
+      - Truthiness and Logic: truthiness-and-logic.md
+      - Sequences and Sorting: sequences-and-sorting.md
+      - Object-Oriented Light: oop-lite.md
+      - File Handles: runtime-files.md
+      - System and Processes: system.md
+      - Error Handling: error-handling.md
   - Architecture: architecture.md
   - Configuration: configuration.md
   - Development: development.md

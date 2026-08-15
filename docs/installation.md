@@ -95,7 +95,7 @@ meson install -C build
 
 or `./build.sh --install --prefix <dir>` / `.\build.ps1 -Install -Prefix <dir>`.
 
-This installs the headers into `include/abscom/` and the libraries into the platform library directory, plus a pkg-config file (`abscom.pc`) into `lib/pkgconfig/`. The installed headers are: `ac.h`, `ac_common.h`, `ac_dynarray.h`, `ac_string.h`, `ac_hash.h`, `ac_hashmap.h`, `ac_time.h`, `ac_fs.h`, and `ac_py.h`.
+This installs the headers into `include/abscom/` and the libraries into the platform library directory, plus a pkg-config file (`abscom.pc`) into `lib/pkgconfig/`. The installed headers are: `abs.h`, `abs_common.h`, `abs_dynarray.h`, `abs_string.h`, `abs_hash.h`, `abs_hashmap.h`, `abs_time.h`, and `abs_fs.h`.
 
 ## Linking manually
 

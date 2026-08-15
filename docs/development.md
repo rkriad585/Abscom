@@ -1,4 +1,4 @@
-﻿# Development
+# Development
 
 This guide covers building, testing, and working on Abscom itself.
 
@@ -45,9 +45,9 @@ The suite (`tests/test_*.c`) covers:
 | `test_hash` | FNV-1a and djb2 hash functions. |
 | `test_hashmap` | Hash map insert/get/remove/foreach and resizing. |
 | `test_platform` | Time helpers and file I/O. |
-| `test_py` | The `ac_py` runtime: literals, containers, JSON, random, functional helpers, sets, OOP, formatting, and error handling. |
+| `test_abs` | The dynamic runtime: literals, containers, JSON, random, functional helpers, sets, OOP, formatting, and error handling. |
 
-Run a single test with `meson test -C build test_py`.
+Run a single test with `meson test -C build test_abs`.
 
 ## Run examples
 
@@ -65,16 +65,16 @@ Run a single test with `meson test -C build test_py`.
 1. Declare the API in the matching header under `include/abscom/`.
 2. Implement it in the matching source file under `src/`.
 3. Add coverage to the matching `tests/test_*.c` file.
-4. If it belongs to `ac_py`, consider demonstrating it in one of the example programs.
+4. If it belongs to the runtime, consider demonstrating it in one of the example programs.
 5. Run `meson compile -C build` and `meson test -C build`; both must pass cleanly.
 
 ## Code conventions
 
 - C11, no third-party dependencies.
-- Core modules return `0` on success and non-zero on failure; `ac_py` signals errors with `ABS_ERROR` objects.
-- `ac_py` uses `var` (`AbsObj *`), the `v()` literal macro, and pooled allocation.
-- Keep the headers self-contained (each includes `ac_common.h` first).
-- Follow the existing naming: `ac_<module>_<verb>` for core functions, short Python-like names for `ac_py`.
+- Core modules return `0` on success and non-zero on failure; the runtime signals errors with `ABS_ERROR` objects.
+- The runtime uses `var` (`AbsObj *`), the `v()` literal macro, and pooled allocation.
+- Keep the headers self-contained (each includes `abs_common.h` first).
+- Follow the existing naming: `abs_<module>_<verb>` for core functions, short Python-like names for the runtime.
 
 ## Versioning
 

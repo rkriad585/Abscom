@@ -1,4 +1,4 @@
-#include "abscom/ac_py.h"
+#include "abscom/abs.h"
 
 static var double_it(var x) {
     if (x->type == ABS_INT) return abs_new_int(x->val.i * 2);

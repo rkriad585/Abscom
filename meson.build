@@ -18,19 +18,19 @@ else
 endif
 
 srcs = files(
-  'src/ac_dynarray.c',
-  'src/ac_string.c',
-  'src/ac_hash.c',
-  'src/ac_hashmap.c',
-  'src/ac_time.c',
-  'src/ac_fs.c',
-  'src/ac_py.c',
+  'src/abs_dynarray.c',
+  'src/abs_string.c',
+  'src/abs_hash.c',
+  'src/abs_hashmap.c',
+  'src/abs_time.c',
+  'src/abs_fs.c',
+  'src/abs.c',
 )
 
 abscom_lib = both_libraries('abscom', srcs,
   include_directories: inc,
   dependencies: ws_deps + math_deps,
-  c_args: ['-DAC_BUILDING_LIBRARY'],
+  c_args: ['-DABS_BUILDING_LIBRARY'],
   version: meson.project_version(),
   install: true)
 
@@ -41,15 +41,14 @@ abscom_dep = declare_dependency(
 )
 
 install_headers(
-  'include/abscom/ac.h',
-  'include/abscom/ac_common.h',
-  'include/abscom/ac_dynarray.h',
-  'include/abscom/ac_string.h',
-  'include/abscom/ac_hash.h',
-  'include/abscom/ac_hashmap.h',
-  'include/abscom/ac_time.h',
-  'include/abscom/ac_fs.h',
-  'include/abscom/ac_py.h',
+  'include/abscom/abs.h',
+  'include/abscom/abs_common.h',
+  'include/abscom/abs_dynarray.h',
+  'include/abscom/abs_string.h',
+  'include/abscom/abs_hash.h',
+  'include/abscom/abs_hashmap.h',
+  'include/abscom/abs_time.h',
+  'include/abscom/abs_fs.h',
   subdir: 'abscom',
 )
 

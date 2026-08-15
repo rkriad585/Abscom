@@ -1,4 +1,4 @@
-﻿# Getting Started
+# Getting Started
 
 This guide walks through your first Abscom program. It assumes you have a working build (see [installation.md](installation.md) if you have not built the library yet).
 
@@ -6,10 +6,10 @@ This guide walks through your first Abscom program. It assumes you have a workin
 
 ## Hello, Abscom
 
-The easiest way to try Abscom is the Python-inspired runtime (`ac_py`). Create a file named `hello.c`:
+The easiest way to try Abscom is the Python-inspired runtime. Create a file named `hello.c`:
 
 ```c
-#include "abscom/ac_py.h"
+#include "abscom/abs.h"
 
 int main(void) {
     abs_init();
@@ -48,7 +48,7 @@ Sorted: [30, 20, 10]
 
 ## What just happened?
 
-- `abs_init()` initializes the runtime (memory pool, random seed, and Winsock on Windows). Call it once before using any `ac_py` function.
+- `abs_init()` initializes the runtime (memory pool, random seed, and Winsock on Windows). Call it once before using any runtime function.
 - `List()` creates an empty dynamic list.
 - `append(list, item)` adds an element.
 - `v(...)` is a `_Generic` literal macro that wraps a C value into a `var` object (int, float, string, or bool).
@@ -60,24 +60,24 @@ Sorted: [30, 20, 10]
 If you only need data structures and platform helpers, include the umbrella header instead:
 
 ```c
-#include "abscom/ac.h"
+#include "abscom/abs.h"
 
 int main(void) {
-    ac_string_t s;
-    ac_string_init(&s);
-    ac_string_append_fmt(&s, "Hello %s!", "world");
-    printf("%s\n", ac_string_c_str(&s));
-    ac_string_destroy(&s);
+    abs_string_t s;
+    abs_string_init(&s);
+    abs_string_append_fmt(&s, "Hello %s!", "world");
+    printf("%s\n", abs_string_c_str(&s));
+    abs_string_destroy(&s);
     return 0;
 }
 ```
 
-The `ac.h` header includes `ac_dynarray.h`, `ac_string.h`, `ac_hash.h`, `ac_hashmap.h`, `ac_time.h`, and `ac_fs.h`.
+The `abs.h` header includes `abs_dynarray.h`, `abs_string.h`, `abs_hash.h`, `abs_hashmap.h`, `abs_time.h`, `abs_fs.h`, and the dynamic runtime.
 
 ## Next steps
 
-- Explore more recipes in [usage.md](usage.md).
-- Read the full function reference in [api.md](api.md).
+- Core library: [common macros](common-macros.md), [dynamic arrays](dynamic-arrays.md), [strings](strings.md), [hashing](hashing.md), [hash maps](hash-maps.md), [time](time.md), [file I/O](file-io.md).
+- Runtime: [lifecycle](lifecycle.md), [literals and constructors](literals-and-constructors.md), [lists and ranges](lists-and-ranges.md), [loops](loops.md), [dictionaries](dictionaries.md), [sets](sets.md), [JSON](json.md), and more.
 - Run the bundled examples: `demo`, `py_demo`, `data_demo`, and `v6_demo` (see [development.md](development.md)).
 - Learn how the modules fit together in [architecture.md](architecture.md).
 

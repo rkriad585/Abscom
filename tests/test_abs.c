@@ -1,5 +1,4 @@
-#include "abscom/ac.h"
-#include "abscom/ac_py.h"
+#include "abscom/abs.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -264,16 +263,16 @@ int main(void) {
     }
 
     {
-        var f = fopen_safe("test_py_tmp.txt", "w");
+        var f = fopen_safe("test_abs_tmp.txt", "w");
         CHECK(f != NULL && f->type == ABS_FILE);
         write_file(f, v("hello file\n"));
         write_file(f, v("second line"));
         close_file(f);
-        var f2 = fopen_safe("test_py_tmp.txt", "r");
+        var f2 = fopen_safe("test_abs_tmp.txt", "r");
         var content = read_file(f2);
         CHECK(strcmp(content->val.s, "hello file\nsecond line") == 0);
         close_file(f2);
-        remove("test_py_tmp.txt");
+        remove("test_abs_tmp.txt");
         var bad = fopen_safe("no_such_file_xyz_abscom.txt", "r");
         CHECK(is_err(bad));
         CHECK(is_err(read_file(v(5))));
@@ -602,6 +601,6 @@ int main(void) {
     print_end("", v("no newline"));
 
     abs_cleanup();
-    printf("test_py: OK\n");
+    printf("test_abs: OK\n");
     return 0;
 }

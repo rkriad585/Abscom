@@ -1,11 +1,11 @@
 # Abscom
 
-**Abscom** is a C11 library of reusable data structures and platform utilities, plus a Python-inspired dynamic runtime (`ac_py`) for scripting-style C programs.
+**Abscom** is a C11 library of reusable data structures and platform utilities, plus a Python-inspired dynamic runtime for scripting-style C programs.
 
 - Zero third-party C dependencies — just the standard library, plus `ws2_32` on Windows.
 - Dynamic array, growable string, hash functions, and an open-addressing hash map.
 - Monotonic/wall-clock time and simple file I/O helpers.
-- `ac_py`: `var` values, lists, dictionaries, sets, JSON, random utilities, functional helpers, and a light object system.
+- **Runtime**: `var` values, lists, dictionaries, sets, JSON, random utilities, functional helpers, and a light object system.
 
 ## Get started
 
@@ -13,13 +13,13 @@
 | --- | --- |
 | [Getting Started](getting-started.md) | First steps and a walkthrough. |
 | [Installation](installation.md) | Install via the one-line installer or build from source. |
-| [Usage](usage.md) | Practical API recipes with output. |
-| [API Reference](api.md) | Full reference for `ac.h` and `ac_py.h`. |
+| [Core library](common-macros.md) | Common macros, dynamic arrays, strings, hashing, hash maps, time, file I/O. |
+| [Runtime](lifecycle.md) | Lifecycle, literals, lists and ranges, dictionaries, sets, JSON, and more. |
 
 ## Quick look
 
 ```c
-#include "abscom/ac_py.h"
+#include "abscom/abs.h"
 
 int main(void) {
     abs_init();

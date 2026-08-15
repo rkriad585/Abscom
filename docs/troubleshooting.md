@@ -34,7 +34,7 @@ If you see conflicting Windows headers, make sure only one toolchain's headers a
 
 ## My program crashes with a null pointer or access violation
 
-- Did you call `abs_init()` before using `ac_py`? The memory pool must be initialized.
+- Did you call `abs_init()` before using the runtime? The memory pool must be initialized.
 - Are you calling `http_get` without Winsock initialized? That path is set up by `abs_init()`.
 - Check `is_err()` on functions that can fail (`get`, `json_parse`, `fopen_safe`, `http_get`, ...) before dereferencing.
 - `v()` takes a value; passing a raw `bool` where `print` expects `var` arguments is a type error — wrap booleans with `v(...)`.
@@ -61,7 +61,7 @@ setvbuf(stdout, NULL, _IONBF, 0);
 
 ## Tests fail on the very first run
 
-The test suite writes temporary files (`test_py_tmp.txt`, `ac_fs_test.txt`, ...) and `py_demo` writes `demo_output.txt`. Make sure the working directory is writable. Rebuild from a clean state if an interrupted run left stale files:
+The test suite writes temporary files (`test_abs_tmp.txt`, `abs_fs_test.txt`, ...) and `py_demo` writes `demo_output.txt`. Make sure the working directory is writable. Rebuild from a clean state if an interrupted run left stale files:
 
 ```sh
 rm -rf build
@@ -72,6 +72,6 @@ meson test -C build
 
 ## DLL import/export errors on Windows
 
-`AC_API` handles this automatically: it becomes `__declspec(dllexport)` when `AC_BUILDING_LIBRARY` is defined (set by `meson.build`) and `__declspec(dllimport)` when `AC_USE_LIBRARY` is defined by a consumer. If you see unresolved symbols against the shared library, define `AC_USE_LIBRARY` when compiling your application, or link the static library instead.
+`ABS_API` handles this automatically: it becomes `__declspec(dllexport)` when `ABS_BUILDING_LIBRARY` is defined (set by `meson.build`) and `__declspec(dllimport)` when `ABS_USE_LIBRARY` is defined by a consumer. If you see unresolved symbols against the shared library, define `ABS_USE_LIBRARY` when compiling your application, or link the static library instead.
 
 Back to [README](https://github.com/rkriad585/Abscom/blob/main/README.md).

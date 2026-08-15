@@ -310,7 +310,7 @@ else {
     if ($gcc) {
         foreach ($src in $srcFiles) {
             $obj = Join-Path $objDir ($src.BaseName + '.o')
-            & $gcc.Source -std=c11 -O2 -DAC_BUILDING_LIBRARY -I $srcInc -c $src.FullName -o $obj
+            & $gcc.Source -std=c11 -O2 -DABS_BUILDING_LIBRARY -I $srcInc -c $src.FullName -o $obj
             if ($LASTEXITCODE -ne 0) { Write-Error "gcc failed on $($src.Name)" }
             $objList += $obj
         }
@@ -320,7 +320,7 @@ else {
     elseif ($cl) {
         foreach ($src in $srcFiles) {
             $obj = Join-Path $objDir ($src.BaseName + '.obj')
-            & $cl.Source /nologo /std:c11 /O2 /DAC_BUILDING_LIBRARY "/I$srcInc" /c $src.FullName "/Fo$obj"
+            & $cl.Source /nologo /std:c11 /O2 /DABS_BUILDING_LIBRARY "/I$srcInc" /c $src.FullName "/Fo$obj"
             if ($LASTEXITCODE -ne 0) { Write-Error "cl failed on $($src.Name)" }
             $objList += $obj
         }

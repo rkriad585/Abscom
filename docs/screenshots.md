@@ -10,27 +10,27 @@ python tools/generate_screenshots.py
 
 ## home.png
 
-The front-page screenshot: `hello.c`, the quick-start program that uses the `ac_py` runtime — `List`/`Dict`, the `v()` literal macro, `append`/`dset`/`dget`, and `print`.
+The front-page screenshot: `hello.c`, the quick-start program that uses the dynamic runtime — `List`/`Dict`, the `v()` literal macro, `append`/`dset`/`dget`, and `print`.
 
-![hello.c — ac_py quick start](https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/home.png)
+![hello.c — quick start](https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/home.png)
 
-*`hello.c` — the `ac_py` quick-start program.*
+*`hello.c` — the quick-start program.*
 
-## ac_py.png
+## abs_py.png
 
 `py_demo.c`, a walkthrough of the Python-inspired runtime: `json_parse`, sets with deduplication, the `foreach` macro, `range`, and the `Class`/`New`/`set_attr`/`get_attr` object system.
 
-![py_demo.c — ac_py runtime](https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/ac_py.png)
+![py_demo.c — dynamic runtime](https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/abs_py.png)
 
 *`py_demo.c` — dictionaries, JSON, sets, `foreach`, and classes.*
 
 ## core.png
 
-`core_demo.c`, the low-level modules: growable string (`ac_string`), dynamic array (`ac_dynarray`), hash map (`ac_hashmap`), wall clock (`ac_time`), and file I/O (`ac_fs`).
+`core_demo.c`, the low-level modules: growable string (`abs_string`), dynamic array (`abs_dynarray`), hash map (`abs_hashmap`), wall clock (`abs_time`), and file I/O (`abs_fs`).
 
 ![core_demo.c — core modules](https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/core.png)
 
-*`core_demo.c` — `ac_string`, `ac_dynarray`, `ac_hashmap`, `ac_time`, and `ac_fs`.*
+*`core_demo.c` — `abs_string`, `abs_dynarray`, `abs_hashmap`, `abs_time`, and `abs_fs`.*
 
 ## examples.png
 

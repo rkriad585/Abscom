@@ -1,9 +1,9 @@
-#include "abscom/ac_fs.h"
+#include "abscom/abs_fs.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-int ac_fs_exists(const char *path) {
+int abs_fs_exists(const char *path) {
     if (!path) return 0;
     FILE *f = fopen(path, "rb");
     if (f) {
@@ -13,7 +13,7 @@ int ac_fs_exists(const char *path) {
     return 0;
 }
 
-int ac_fs_read_file(const char *path, char **out_data, size_t *out_size) {
+int abs_fs_read_file(const char *path, char **out_data, size_t *out_size) {
     if (!path || !out_data) return -1;
     if (out_size) *out_size = 0;
     *out_data = NULL;
@@ -46,7 +46,7 @@ int ac_fs_read_file(const char *path, char **out_data, size_t *out_size) {
     return 0;
 }
 
-int ac_fs_write_file(const char *path, const void *data, size_t size) {
+int abs_fs_write_file(const char *path, const void *data, size_t size) {
     if (!path || (!data && size > 0)) return -1;
     FILE *f = fopen(path, "wb");
     if (!f) return -1;
@@ -58,10 +58,10 @@ int ac_fs_write_file(const char *path, const void *data, size_t size) {
     return 0;
 }
 
-int ac_fs_remove(const char *path) {
+int abs_fs_remove(const char *path) {
     return (path && remove(path) == 0) ? 0 : -1;
 }
 
-int ac_fs_rename(const char *from, const char *to) {
+int abs_fs_rename(const char *from, const char *to) {
     return (from && to && rename(from, to) == 0) ? 0 : -1;
 }

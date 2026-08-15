@@ -1,5 +1,5 @@
-#include "abscom/ac_py.h"
-#include "abscom/ac_string.h"
+#include "abscom/abs.h"
+#include "abscom/abs_string.h"
 
 #include <ctype.h>
 #include <math.h>
@@ -451,64 +451,64 @@ var eq(var a, var b) {
     return abs_new_bool(false);
 }
 
-static void str_build(ac_string_t *s, var obj) {
+static void str_build(abs_string_t *s, var obj) {
     char buf[64];
     switch (obj->type) {
         case ABS_INT:
             snprintf(buf, sizeof(buf), "%ld", obj->val.i);
-            ac_string_append_cstr(s, buf);
+            abs_string_append_cstr(s, buf);
             break;
         case ABS_FLOAT:
             snprintf(buf, sizeof(buf), "%.2f", obj->val.f);
-            ac_string_append_cstr(s, buf);
+            abs_string_append_cstr(s, buf);
             break;
         case ABS_STR:
-            ac_string_append_cstr(s, obj->val.s);
+            abs_string_append_cstr(s, obj->val.s);
             break;
         case ABS_BOOL:
-            ac_string_append_cstr(s, obj->val.b ? "True" : "False");
+            abs_string_append_cstr(s, obj->val.b ? "True" : "False");
             break;
         case ABS_NONE:
-            ac_string_append_cstr(s, "None");
+            abs_string_append_cstr(s, "None");
             break;
         case ABS_LIST:
-            ac_string_append_cstr(s, "[");
+            abs_string_append_cstr(s, "[");
             for (size_t i = 0; i < obj->val.list.size; i++) {
-                if (i > 0) ac_string_append_cstr(s, ", ");
+                if (i > 0) abs_string_append_cstr(s, ", ");
                 str_build(s, obj->val.list.items[i]);
             }
-            ac_string_append_cstr(s, "]");
+            abs_string_append_cstr(s, "]");
             break;
         case ABS_DICT: {
-            ac_string_append_cstr(s, "{");
+            abs_string_append_cstr(s, "{");
             int first_item = 1;
             for (size_t i = 0; i < obj->val.dict.capacity; i++) {
                 DictNode *node = obj->val.dict.buckets[i];
                 while (node) {
-                    if (!first_item) ac_string_append_cstr(s, ", ");
-                    ac_string_append_cstr(s, node->key);
-                    ac_string_append_cstr(s, ": ");
+                    if (!first_item) abs_string_append_cstr(s, ", ");
+                    abs_string_append_cstr(s, node->key);
+                    abs_string_append_cstr(s, ": ");
                     str_build(s, node->value);
                     first_item = 0;
                     node = node->next;
                 }
             }
-            ac_string_append_cstr(s, "}");
+            abs_string_append_cstr(s, "}");
             break;
         }
         case ABS_SET: {
-            ac_string_append_cstr(s, "{");
+            abs_string_append_cstr(s, "{");
             for (size_t i = 0; i < obj->val.list.size; i++) {
-                if (i > 0) ac_string_append_cstr(s, ", ");
+                if (i > 0) abs_string_append_cstr(s, ", ");
                 str_build(s, obj->val.list.items[i]);
             }
-            ac_string_append_cstr(s, "}");
+            abs_string_append_cstr(s, "}");
             break;
         }
         case ABS_CLASS: {
             char cls_buf[128];
             snprintf(cls_buf, sizeof(cls_buf), "<class '%s'>", obj->val.cls.name);
-            ac_string_append_cstr(s, cls_buf);
+            abs_string_append_cstr(s, cls_buf);
             break;
         }
         case ABS_INSTANCE: {
@@ -518,14 +518,14 @@ static void str_build(ac_string_t *s, var obj) {
                          obj->val.inst.cls_ptr->val.cls.name);
             else
                 snprintf(inst_buf, sizeof(inst_buf), "<instance object>");
-            ac_string_append_cstr(s, inst_buf);
+            abs_string_append_cstr(s, inst_buf);
             break;
         }
         case ABS_FILE:
-            ac_string_append_cstr(s, "<file>");
+            abs_string_append_cstr(s, "<file>");
             break;
         case ABS_ERROR:
-            ac_string_append_cstr(s, obj->val.error_msg);
+            abs_string_append_cstr(s, obj->val.error_msg);
             break;
     }
 }
@@ -533,11 +533,11 @@ static void str_build(ac_string_t *s, var obj) {
 var to_str(var obj) {
     if (!obj) return abs_new_str("None");
     if (obj->type == ABS_STR) return obj;
-    ac_string_t s;
-    ac_string_init(&s);
+    abs_string_t s;
+    abs_string_init(&s);
     str_build(&s, obj);
-    var res = abs_new_str(ac_string_c_str(&s));
-    ac_string_destroy(&s);
+    var res = abs_new_str(abs_string_c_str(&s));
+    abs_string_destroy(&s);
     return res;
 }
 
@@ -707,25 +707,25 @@ var join(var delimiter, var list_obj) {
 var fmt_impl(const char *format, ...) {
     va_list args;
     va_start(args, format);
-    ac_string_t s;
-    ac_string_init(&s);
+    abs_string_t s;
+    abs_string_init(&s);
     const char *p = format ? format : "";
     while (*p) {
         if (p[0] == '{' && p[1] == '}') {
             var arg = va_arg(args, var);
             if (arg) {
                 var text = to_str(arg);
-                if (text && text->val.s) ac_string_append_cstr(&s, text->val.s);
+                if (text && text->val.s) abs_string_append_cstr(&s, text->val.s);
             }
             p += 2;
         } else {
-            ac_string_append_char(&s, *p);
+            abs_string_append_char(&s, *p);
             p++;
         }
     }
     va_end(args);
-    var res = abs_new_str(ac_string_c_str(&s));
-    ac_string_destroy(&s);
+    var res = abs_new_str(abs_string_c_str(&s));
+    abs_string_destroy(&s);
     return res;
 }
 
@@ -822,35 +822,35 @@ static var parse_json_value(void);
 static var parse_json_string(void) {
     if (*json_cur == '"') json_cur++;
     else return abs_new_error("Expected string");
-    ac_string_t s;
-    ac_string_init(&s);
+    abs_string_t s;
+    abs_string_init(&s);
     while (*json_cur && *json_cur != '"') {
         char c = *json_cur;
         if (c == '\\') {
             json_cur++;
             if (!*json_cur) break;
             switch (*json_cur) {
-                case 'n': ac_string_append_char(&s, '\n'); break;
-                case 't': ac_string_append_char(&s, '\t'); break;
-                case 'r': ac_string_append_char(&s, '\r'); break;
-                case 'b': ac_string_append_char(&s, '\b'); break;
-                case 'f': ac_string_append_char(&s, '\f'); break;
-                case '"': ac_string_append_char(&s, '"'); break;
-                case '\\': ac_string_append_char(&s, '\\'); break;
-                case '/': ac_string_append_char(&s, '/'); break;
+                case 'n': abs_string_append_char(&s, '\n'); break;
+                case 't': abs_string_append_char(&s, '\t'); break;
+                case 'r': abs_string_append_char(&s, '\r'); break;
+                case 'b': abs_string_append_char(&s, '\b'); break;
+                case 'f': abs_string_append_char(&s, '\f'); break;
+                case '"': abs_string_append_char(&s, '"'); break;
+                case '\\': abs_string_append_char(&s, '\\'); break;
+                case '/': abs_string_append_char(&s, '/'); break;
                 default:
-                    ac_string_append_char(&s, '\\');
-                    ac_string_append_char(&s, *json_cur);
+                    abs_string_append_char(&s, '\\');
+                    abs_string_append_char(&s, *json_cur);
                     break;
             }
         } else {
-            ac_string_append_char(&s, c);
+            abs_string_append_char(&s, c);
         }
         json_cur++;
     }
     if (*json_cur == '"') json_cur++;
-    var res = abs_new_str(ac_string_c_str(&s));
-    ac_string_destroy(&s);
+    var res = abs_new_str(abs_string_c_str(&s));
+    abs_string_destroy(&s);
     return res;
 }
 
@@ -1292,24 +1292,24 @@ var get_attr(var obj, const char *key) {
     return dget(obj->val.inst.attr_dict, key ? key : "");
 }
 
-static void json_escape(ac_string_t *s, const char *text) {
+static void json_escape(abs_string_t *s, const char *text) {
     char esc[8];
     const unsigned char *p = (const unsigned char *)text;
     while (*p) {
         switch (*p) {
-            case '"':  ac_string_append_cstr(s, "\\\""); break;
-            case '\\': ac_string_append_cstr(s, "\\\\"); break;
-            case '\n': ac_string_append_cstr(s, "\\n"); break;
-            case '\r': ac_string_append_cstr(s, "\\r"); break;
-            case '\t': ac_string_append_cstr(s, "\\t"); break;
-            case '\b': ac_string_append_cstr(s, "\\b"); break;
-            case '\f': ac_string_append_cstr(s, "\\f"); break;
+            case '"':  abs_string_append_cstr(s, "\\\""); break;
+            case '\\': abs_string_append_cstr(s, "\\\\"); break;
+            case '\n': abs_string_append_cstr(s, "\\n"); break;
+            case '\r': abs_string_append_cstr(s, "\\r"); break;
+            case '\t': abs_string_append_cstr(s, "\\t"); break;
+            case '\b': abs_string_append_cstr(s, "\\b"); break;
+            case '\f': abs_string_append_cstr(s, "\\f"); break;
             default:
                 if (*p < 0x20) {
                     snprintf(esc, sizeof(esc), "\\u%04x", *p);
-                    ac_string_append_cstr(s, esc);
+                    abs_string_append_cstr(s, esc);
                 } else {
-                    ac_string_append_char(s, (char)*p);
+                    abs_string_append_char(s, (char)*p);
                 }
                 break;
         }
@@ -1317,72 +1317,72 @@ static void json_escape(ac_string_t *s, const char *text) {
     }
 }
 
-static void json_dump_rec(ac_string_t *s, var obj) {
+static void json_dump_rec(abs_string_t *s, var obj) {
     char buf[64];
     if (!obj) {
-        ac_string_append_cstr(s, "null");
+        abs_string_append_cstr(s, "null");
         return;
     }
     switch (obj->type) {
         case ABS_INT:
             snprintf(buf, sizeof(buf), "%ld", obj->val.i);
-            ac_string_append_cstr(s, buf);
+            abs_string_append_cstr(s, buf);
             break;
         case ABS_FLOAT:
             snprintf(buf, sizeof(buf), "%.17g", obj->val.f);
-            ac_string_append_cstr(s, buf);
+            abs_string_append_cstr(s, buf);
             break;
         case ABS_STR:
-            ac_string_append_char(s, '"');
+            abs_string_append_char(s, '"');
             json_escape(s, obj->val.s);
-            ac_string_append_char(s, '"');
+            abs_string_append_char(s, '"');
             break;
         case ABS_BOOL:
-            ac_string_append_cstr(s, obj->val.b ? "true" : "false");
+            abs_string_append_cstr(s, obj->val.b ? "true" : "false");
             break;
         case ABS_NONE:
-            ac_string_append_cstr(s, "null");
+            abs_string_append_cstr(s, "null");
             break;
         case ABS_LIST:
         case ABS_SET: {
-            ac_string_append_char(s, '[');
+            abs_string_append_char(s, '[');
             for (size_t i = 0; i < obj->val.list.size; i++) {
-                if (i > 0) ac_string_append_cstr(s, ", ");
+                if (i > 0) abs_string_append_cstr(s, ", ");
                 json_dump_rec(s, obj->val.list.items[i]);
             }
-            ac_string_append_char(s, ']');
+            abs_string_append_char(s, ']');
             break;
         }
         case ABS_DICT: {
-            ac_string_append_char(s, '{');
+            abs_string_append_char(s, '{');
             int count = 0;
             for (size_t i = 0; i < obj->val.dict.capacity; i++) {
                 DictNode *node = obj->val.dict.buckets[i];
                 while (node) {
-                    if (count > 0) ac_string_append_cstr(s, ", ");
-                    ac_string_append_char(s, '"');
+                    if (count > 0) abs_string_append_cstr(s, ", ");
+                    abs_string_append_char(s, '"');
                     json_escape(s, node->key);
-                    ac_string_append_cstr(s, "\": ");
+                    abs_string_append_cstr(s, "\": ");
                     json_dump_rec(s, node->value);
                     count++;
                     node = node->next;
                 }
             }
-            ac_string_append_char(s, '}');
+            abs_string_append_char(s, '}');
             break;
         }
         default:
-            ac_string_append_cstr(s, "null");
+            abs_string_append_cstr(s, "null");
             break;
     }
 }
 
 var json_dump(var obj) {
-    ac_string_t s;
-    ac_string_init(&s);
+    abs_string_t s;
+    abs_string_init(&s);
     json_dump_rec(&s, obj);
-    var res = abs_new_str(ac_string_c_str(&s));
-    ac_string_destroy(&s);
+    var res = abs_new_str(abs_string_c_str(&s));
+    abs_string_destroy(&s);
     return res;
 }
 
@@ -1446,8 +1446,8 @@ var http_get(const char *url) {
     send(sock_fd, req, strlen(req), 0);
 #endif
 
-    ac_string_t resp;
-    ac_string_init(&resp);
+    abs_string_t resp;
+    abs_string_init(&resp);
     char buf[1024];
     int received;
 #ifdef _WIN32
@@ -1456,7 +1456,7 @@ var http_get(const char *url) {
     while ((received = (int)recv(sock_fd, buf, sizeof(buf) - 1, 0)) > 0) {
 #endif
         buf[received] = '\0';
-        ac_string_append_cstr(&resp, buf);
+        abs_string_append_cstr(&resp, buf);
     }
 #ifdef _WIN32
     closesocket((SOCKET)sock_fd);
@@ -1464,9 +1464,9 @@ var http_get(const char *url) {
     close(sock_fd);
 #endif
 
-    const char *body = strstr(ac_string_c_str(&resp), "\r\n\r\n");
-    var res = body ? abs_new_str(body + 4) : abs_new_str(ac_string_c_str(&resp));
-    ac_string_destroy(&resp);
+    const char *body = strstr(abs_string_c_str(&resp), "\r\n\r\n");
+    var res = body ? abs_new_str(body + 4) : abs_new_str(abs_string_c_str(&resp));
+    abs_string_destroy(&resp);
     return res;
 }
 

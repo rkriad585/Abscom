@@ -1,16 +1,16 @@
-#include "abscom/ac_time.h"
+#include "abscom/abs_time.h"
 
 #if defined(_WIN32)
 #include <windows.h>
 
-double ac_time_now(void) {
+double abs_time_now(void) {
     LARGE_INTEGER freq, c;
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&c);
     return (double)c.QuadPart / (double)freq.QuadPart;
 }
 
-double ac_time_wall(void) {
+double abs_time_wall(void) {
     FILETIME ft;
     ULARGE_INTEGER u;
     GetSystemTimeAsFileTime(&ft);
@@ -19,14 +19,14 @@ double ac_time_wall(void) {
     return (double)(u.QuadPart - 116444736000000000ULL) / 10000000.0;
 }
 
-uint64_t ac_time_now_ns(void) {
+uint64_t abs_time_now_ns(void) {
     LARGE_INTEGER freq, c;
     QueryPerformanceFrequency(&freq);
     QueryPerformanceCounter(&c);
     return (uint64_t)(((long double)c.QuadPart * 1000000000.0L) / (long double)freq.QuadPart);
 }
 
-uint64_t ac_time_wall_ms(void) {
+uint64_t abs_time_wall_ms(void) {
     FILETIME ft;
     ULARGE_INTEGER u;
     GetSystemTimeAsFileTime(&ft);
@@ -38,25 +38,25 @@ uint64_t ac_time_wall_ms(void) {
 #else
 #include <time.h>
 
-double ac_time_now(void) {
+double abs_time_now(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
 }
 
-double ac_time_wall(void) {
+double abs_time_wall(void) {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     return (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
 }
 
-uint64_t ac_time_now_ns(void) {
+uint64_t abs_time_now_ns(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
 }
 
-uint64_t ac_time_wall_ms(void) {
+uint64_t abs_time_wall_ms(void) {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     return (uint64_t)ts.tv_sec * 1000ULL + (uint64_t)ts.tv_nsec / 1000000ULL;

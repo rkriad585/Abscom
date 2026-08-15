@@ -57,15 +57,50 @@ DOT_YELLOW = (254, 188, 46)
 DOT_GREEN = (40, 200, 72)
 
 KEYWORDS = {
-    "auto", "break", "case", "char", "const", "continue", "default", "do",
-    "double", "else", "enum", "extern", "float", "for", "goto", "if", "int",
-    "long", "register", "return", "short", "signed", "sizeof", "static",
-    "struct", "switch", "typedef", "union", "unsigned", "void", "volatile",
+    "auto",
+    "break",
+    "case",
+    "char",
+    "const",
+    "continue",
+    "default",
+    "do",
+    "double",
+    "else",
+    "enum",
+    "extern",
+    "float",
+    "for",
+    "goto",
+    "if",
+    "int",
+    "long",
+    "register",
+    "return",
+    "short",
+    "signed",
+    "sizeof",
+    "static",
+    "struct",
+    "switch",
+    "typedef",
+    "union",
+    "unsigned",
+    "void",
+    "volatile",
     "while",
 }
 TYPES = {
-    "bool", "var", "size_t", "AbsObj", "AbsFunc", "AbsMapFunc", "AbsFilterFunc",
-    "ac_string_t", "ac_dynarray_t", "ac_hashmap_t",
+    "bool",
+    "var",
+    "size_t",
+    "AbsObj",
+    "AbsFunc",
+    "AbsMapFunc",
+    "AbsFilterFunc",
+    "abs_string_t",
+    "abs_dynarray_t",
+    "abs_hashmap_t",
 }
 CONSTANTS = {"true", "false", "NULL", "None"}
 MACROS = {"foreach"}
@@ -169,7 +204,9 @@ def highlight_lines(code, font):
 def draw_traffic_lights(draw, y):
     for i, color in enumerate((DOT_RED, DOT_YELLOW, DOT_GREEN)):
         cx = 22 + i * 18
-        draw.ellipse((cx - 6, y + TITLE_H // 2 - 6, cx + 6, y + TITLE_H // 2 + 6), fill=color)
+        draw.ellipse(
+            (cx - 6, y + TITLE_H // 2 - 6, cx + 6, y + TITLE_H // 2 + 6), fill=color
+        )
 
 
 def draw_chevron(draw, x, y, down=False, color=(138, 138, 138)):
@@ -187,7 +224,9 @@ def draw_folder(draw, x, y, color=(214, 164, 108)):
 
 def draw_file(draw, x, y, color=(200, 200, 200)):
     draw.rectangle((x + 2, y, x + 12, y + 13), fill=color)
-    draw.polygon([(x + 2, y), (x + 6, y), (x + 6, y + 3), (x + 9, y + 3)], fill=(90, 90, 95))
+    draw.polygon(
+        [(x + 2, y), (x + 6, y), (x + 6, y + 3), (x + 9, y + 3)], fill=(90, 90, 95)
+    )
     draw.polygon([(x + 2, y), (x + 2, y + 13), (x + 12, y + 13)], fill=color)
 
 
@@ -220,11 +259,24 @@ def draw_sidebar(draw, font, num_font, tree, active_name):
 
 def draw_tabs(draw, font, filename):
     draw.rectangle((SIDEBAR_W, TITLE_H, WIDTH, TITLE_H + TAB_H), fill=TAB_BG)
-    draw.rectangle((SIDEBAR_W + 1, TITLE_H + 2, SIDEBAR_W + 170, TITLE_H + TAB_H - 2), fill=TAB_ACTIVE_BG)
-    draw.text((SIDEBAR_W + 14, TITLE_H + (TAB_H - font.size) // 2), filename, font=font, fill=(255, 255, 255))
+    draw.rectangle(
+        (SIDEBAR_W + 1, TITLE_H + 2, SIDEBAR_W + 170, TITLE_H + TAB_H - 2),
+        fill=TAB_ACTIVE_BG,
+    )
+    draw.text(
+        (SIDEBAR_W + 14, TITLE_H + (TAB_H - font.size) // 2),
+        filename,
+        font=font,
+        fill=(255, 255, 255),
+    )
     cx = SIDEBAR_W + 150
     draw.text((cx, TITLE_H + (TAB_H - font.size) // 2 - 1), "x", font=font, fill=DIM_FG)
-    draw.text((WIDTH - 26, TITLE_H + (TAB_H - font.size) // 2 - 1), "+", font=font, fill=DIM_FG)
+    draw.text(
+        (WIDTH - 26, TITLE_H + (TAB_H - font.size) // 2 - 1),
+        "+",
+        font=font,
+        fill=DIM_FG,
+    )
 
 
 def draw_editor(draw, font, num_font, code, gutter_w, cursor):
@@ -243,10 +295,17 @@ def draw_editor(draw, font, num_font, code, gutter_w, cursor):
         y = ey + idx * LINE_H
         num = idx + 1
         nw = num_font.getlength(str(num))
-        draw.text((ex + gutter_w - nw - 12, y + (LINE_H - num_font.size) // 2 - 1), str(num), font=num_font, fill=GUTTER_FG)
+        draw.text(
+            (ex + gutter_w - nw - 12, y + (LINE_H - num_font.size) // 2 - 1),
+            str(num),
+            font=num_font,
+            fill=GUTTER_FG,
+        )
         cx = text_x
         for text, color in parts:
-            draw.text((cx, y + (LINE_H - font.size) // 2 - 1), text, font=font, fill=color)
+            draw.text(
+                (cx, y + (LINE_H - font.size) // 2 - 1), text, font=font, fill=color
+            )
             cx += font.getlength(text)
     if cursor_line >= 1 and cursor_col >= 1:
         if cursor_line - 1 < len(code):
@@ -285,10 +344,9 @@ def repo_tree(active):
         (0, "Abscom", "folder", False),
         (1, "include", "folder", False),
         (2, "abscom", "folder", False),
-        (3, "ac.h", "file", False),
-        (3, "ac_py.h", "file", False),
+        (3, "abs.h", "file", False),
         (1, "src", "folder", False),
-        (2, "ac_py.c", "file", False),
+        (2, "abs.c", "file", False),
         (1, "examples", "folder", False),
         (2, "demo.c", "file", active == "demo.c"),
         (2, "py_demo.c", "file", active == "py_demo.c"),
@@ -301,7 +359,7 @@ def repo_tree(active):
 
 
 HELLO = """
-    #include "abscom/ac_py.h"
+    #include "abscom/abs.h"
 
     int main(void) {
         abs_init();
@@ -324,7 +382,7 @@ HELLO = """
 """
 
 PY_DEMO = """
-    #include "abscom/ac_py.h"
+    #include "abscom/abs.h"
 
     int main(void) {
         abs_init();
@@ -355,37 +413,37 @@ PY_DEMO = """
 """
 
 CORE_DEMO = """
-    #include "abscom/ac.h"
+    #include "abscom/abs.h"
 
     int main(void) {
-        ac_string_t buf;
-        ac_string_init(&buf);
-        ac_string_append_fmt(&buf, "Hello %s!", "world");
+        abs_string_t buf;
+        abs_string_init(&buf);
+        abs_string_append_fmt(&buf, "Hello %s!", "world");
 
-        ac_dynarray_t nums;
-        ac_dynarray_init(&nums, sizeof(int));
+        abs_dynarray_t nums;
+        abs_dynarray_init(&nums, sizeof(int));
         int x = 42;
-        ac_dynarray_push(&nums, &x);
-        printf("%d\\n", *(int *)ac_dynarray_at(&nums, 0));
+        abs_dynarray_push(&nums, &x);
+        printf("%d\\n", *(int *)abs_dynarray_at(&nums, 0));
 
-        ac_hashmap_t *m = ac_hashmap_create(NULL);
-        ac_hashmap_set(m, "key", &x);
-        printf("exists: %d\\n", ac_hashmap_contains(m, "key"));
+        abs_hashmap_t *m = abs_hashmap_create(NULL);
+        abs_hashmap_set(m, "key", &x);
+        printf("exists: %d\\n", abs_hashmap_contains(m, "key"));
 
-        printf("%s\\n", ac_string_c_str(&buf));
-        printf("now: %.2f\\n", ac_time_wall());
+        printf("%s\\n", abs_string_c_str(&buf));
+        printf("now: %.2f\\n", abs_time_wall());
 
-        ac_fs_write_file("out.txt", ac_string_c_str(&buf), ac_string_len(&buf));
+        abs_fs_write_file("out.txt", abs_string_c_str(&buf), abs_string_len(&buf));
 
-        ac_hashmap_destroy(m);
-        ac_string_destroy(&buf);
-        ac_dynarray_destroy(&nums);
+        abs_hashmap_destroy(m);
+        abs_string_destroy(&buf);
+        abs_dynarray_destroy(&nums);
         return 0;
     }
 """
 
 V6_DEMO = """
-    #include "abscom/ac_py.h"
+    #include "abscom/abs.h"
 
     static var square_it(var x) { return abs_new_int(x->val.i * x->val.i); }
     static bool is_odd_b(var x) { return x->val.i % 2 != 0; }
@@ -420,7 +478,7 @@ def main():
     outdir = sys.argv[1] if len(sys.argv) > 1 else None
     specs = [
         ("home.png", "hello.c", repo_tree("hello.c"), HELLO, (6, 9)),
-        ("ac_py.png", "py_demo.c", repo_tree("py_demo.c"), PY_DEMO, (6, 9)),
+        ("abs_py.png", "py_demo.c", repo_tree("py_demo.c"), PY_DEMO, (6, 9)),
         ("core.png", "core_demo.c", repo_tree("core_demo.c"), CORE_DEMO, (10, 9)),
         ("examples.png", "v6_demo.c", repo_tree("v6_demo.c"), V6_DEMO, (11, 16)),
     ]
@@ -436,13 +494,25 @@ def main():
         draw_traffic_lights(draw, 0)
         full = f"{tab} - Abscom"
         tw = title_font.getlength(full)
-        draw.text((WIDTH / 2 - tw / 2, (TITLE_H - title_font.size) // 2), full, font=title_font, fill=DIM_FG)
+        draw.text(
+            (WIDTH / 2 - tw / 2, (TITLE_H - title_font.size) // 2),
+            full,
+            font=title_font,
+            fill=DIM_FG,
+        )
         draw_sidebar(draw, small_font, num_font, tree, tab)
         draw_tabs(draw, small_font, tab)
         highlighted = highlight_lines(code, font)
         draw_editor(draw, font, num_font, highlighted, GUTTER_W, cursor)
         draw_status(draw, small_font, cursor)
-        path = os.path.join(outdir or os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Screenshots"), fname)
+        path = os.path.join(
+            outdir
+            or os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "Screenshots",
+            ),
+            fname,
+        )
         img.save(path)
         print("wrote", path)
 

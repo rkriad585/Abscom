@@ -319,7 +319,7 @@ else
 
     for src in "$SRC_DIR"/src/*.c; do
         obj="$OBJ_DIR/$(basename "${src%.c}").o"
-        "$CC" -std=c11 -O2 -DAC_BUILDING_LIBRARY -I"$SRC_INC" -c "$src" -o "$obj"
+        "$CC" -std=c11 -O2 -DABS_BUILDING_LIBRARY -I"$SRC_INC" -c "$src" -o "$obj"
     done
     "$AR" rcs "$LIB_DIR/libabscom.a" "$OBJ_DIR"/*.o
     cp "$SRC_INC"/abscom/*.h "$INC_DIR/"

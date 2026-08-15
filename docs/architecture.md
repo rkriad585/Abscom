@@ -7,23 +7,22 @@ Abscom is a C11 library split into a core module set and a Python-like runtime. 
 ```
 Abscom/
 ├── include/abscom/       # Public headers
-│   ├── ac.h              # Umbrella header (core modules)
-│   ├── ac_common.h       # AC_API, extern "C", AC_UNUSED
-│   ├── ac_dynarray.h     # Dynamic array
-│   ├── ac_string.h       # Growable string
-│   ├── ac_hash.h         # Hash functions
-│   ├── ac_hashmap.h      # String-keyed hash map
-│   ├── ac_time.h         # Time helpers
-│   ├── ac_fs.h           # File I/O
-│   └── ac_py.h           # Python-like runtime
+│   ├── abs.h              # Umbrella header (core modules + runtime)
+│   ├── abs_common.h       # ABS_API, extern "C", ABS_UNUSED
+│   ├── abs_dynarray.h     # Dynamic array
+│   ├── abs_string.h       # Growable string
+│   ├── abs_hash.h         # Hash functions
+│   ├── abs_hashmap.h      # String-keyed hash map
+│   ├── abs_time.h         # Time helpers
+│   └── abs_fs.h           # File I/O
 ├── src/                  # Implementations
-│   ├── ac_dynarray.c
-│   ├── ac_string.c
-│   ├── ac_hash.c
-│   ├── ac_hashmap.c
-│   ├── ac_time.c
-│   ├── ac_fs.c
-│   └── ac_py.c
+│   ├── abs_dynarray.c
+│   ├── abs_string.c
+│   ├── abs_hash.c
+│   ├── abs_hashmap.c
+│   ├── abs_time.c
+│   ├── abs_fs.c
+│   └── abs.c
 ├── tests/                # Meson test suite (test_*.c)
 ├── examples/             # Demo programs (demo, py_demo, data_demo, v6_demo)
 ├── docs/                 # Documentation
@@ -39,14 +38,14 @@ Abscom/
 ```mermaid
 graph TD
     subgraph core["abscom core"]
-        common[ac_common.h - API / ABI macros]
-        dyn[ac_dynarray - dynamic array]
-        str[ac_string - growable string]
-        hash[ac_hash - FNV-1a / djb2]
-        map[ac_hashmap - open-addressing map]
-        time[ac_time - monotonic / wall clock]
-        fs[ac_fs - file I/O]
-        py[ac_py - Python-like runtime]
+        common[abs_common.h - API / ABI macros]
+        dyn[abs_dynarray - dynamic array]
+        str[abs_string - growable string]
+        hash[abs_hash - FNV-1a / djb2]
+        map[abs_hashmap - open-addressing map]
+        time[abs_time - monotonic / wall clock]
+        fs[abs_fs - file I/O]
+        rt[abs - Python-like runtime]
     end
 
     subgraph consumers["consumers"]
@@ -60,26 +59,26 @@ graph TD
     map --> hash
     time --> common
     fs --> common
-    py --> str
+    rt --> str
     tests --> core
     examples --> core
 ```
 
 ## Core modules
 
-- **`ac_common.h`** — defines `AC_API` (DLL export/import on Windows, default visibility on GCC/Clang), `AC_BEGIN_C_DECLS`/`AC_END_C_DECLS` for C++ interoperability, and `AC_UNUSED`. Every other header includes it.
-- **`ac_dynarray`** — a generic (byte-memory) dynamic array. Callers provide `elem_size`; growth doubles capacity (`push` starts at 8).
-- **`ac_string`** — a NUL-terminated growable string with `append_*` variants, `append_fmt`, `set_cstr`, and `take` (ownership transfer).
-- **`ac_hash`** — FNV-1a 32/64 and djb2. `ac_hashmap` depends on FNV-1a 64 for string keys.
-- **`ac_hashmap`** — open-addressing map with linear probing, tombstone deletion, and automatic resizing when load exceeds 70%. `ac_hashmap_free_fn` optionally frees values.
-- **`ac_time`** — wraps `QueryPerformanceCounter`/`GetSystemTimeAsFileTime` on Windows and `clock_gettime` on POSIX behind four simple functions.
-- **`ac_fs`** — thin wrappers around `fopen`/`remove`/`rename`.
+- **`abs_common.h`** — defines `ABS_API` (DLL export/import on Windows, default visibility on GCC/Clang), `ABS_BEGIN_C_DECLS`/`ABS_END_C_DECLS` for C++ interoperability, and `ABS_UNUSED`. Every other header includes it.
+- **`abs_dynarray`** — a generic (byte-memory) dynamic array. Callers provide `elem_size`; growth doubles capacity (`push` starts at 8).
+- **`abs_string`** — a NUL-terminated growable string with `append_*` variants, `append_fmt`, `set_cstr`, and `take` (ownership transfer).
+- **`abs_hash`** — FNV-1a 32/64 and djb2. `abs_hashmap` depends on FNV-1a 64 for string keys.
+- **`abs_hashmap`** — open-addressing map with linear probing, tombstone deletion, and automatic resizing when load exceeds 70%. `abs_hashmap_free_fn` optionally frees values.
+- **`abs_time`** — wraps `QueryPerformanceCounter`/`GetSystemTimeAsFileTime` on Windows and `clock_gettime` on POSIX behind four simple functions.
+- **`abs_fs`** — thin wrappers around `fopen`/`remove`/`rename`.
 
-## The `ac_py` runtime
+## The dynamic runtime
 
-`ac_py` sits on top of `ac_string` and the platform code. Its key design points:
+The runtime sits on top of `abs_string` and the platform code. Its key design points:
 
-- **Object model** — `AbsObj` is a tagged union (`AbsType` + value union). Pointers are pooled: `ac_py.c` uses a block allocator (`POOL_BLOCK_SIZE` objects per `MemBlock`) for most objects, so allocating is cheap.
+- **Object model** — `AbsObj` is a tagged union (`AbsType` + value union). Pointers are pooled: `abs.c` uses a block allocator (`POOL_BLOCK_SIZE` objects per `MemBlock`) for most objects, so allocating is cheap.
 - **Memory management** — objects with heap internals (strings, lists, dicts, sets, errors, classes, files) are tracked on a `gc_dynamic_head` list; `abs_cleanup` frees internals and then the pool blocks. `del()` frees an object's internals and marks it `ABS_NONE`.
 - **Literal macro** — `v(X)` dispatches on the C type via `_Generic` to the right `abs_new_*` constructor.
 - **Containers** — lists and sets share a `{items, size, capacity}` struct; dicts use bucket chains (`DictNode`) with a djb2-style `dict_hash`.
@@ -94,9 +93,9 @@ graph TD
 ## Lifecycle
 
 1. `abs_init()` seeds the RNG and, on Windows, calls `WSAStartup`.
-2. The program uses `ac_py` (or core modules directly).
+2. The program uses the runtime (or core modules directly).
 3. `abs_cleanup()` frees dynamic internals, all pool blocks, and calls `WSACleanup` on Windows.
 
-See [api.md](api.md) for the full function reference and [getting-started.md](getting-started.md) for a first program.
+See the [core library](common-macros.md) and [runtime](lifecycle.md) topic pages for the full reference, and [getting-started.md](getting-started.md) for a first program.
 
 Back to [README](https://github.com/rkriad585/Abscom/blob/main/README.md).

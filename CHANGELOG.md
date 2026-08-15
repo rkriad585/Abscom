@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Core library (`abscom`):
-  - Dynamic array (`ac_dynarray`) with reserve, push, pop, resize, and indexed access.
-  - Growable string (`ac_string`) with append (C string, bytes, char, formatted), shrink-to-fit, and ownership transfer.
-  - Hash functions (`ac_hash`): FNV-1a 32/64 and djb2.
-  - Open-addressing string-keyed hash map (`ac_hashmap`) with tombstone deletion, resizing, and optional value free callbacks.
-  - Platform helpers: monotonic/wall-clock time (`ac_time`) and file I/O (`ac_fs`).
-  - Umbrella header `abscom/ac.h` and `AC_API` export macros (`ac_common.h`).
-- Python-like runtime (`ac_py`):
+  - Dynamic array (`abs_dynarray`) with reserve, push, pop, resize, and indexed access.
+  - Growable string (`abs_string`) with append (C string, bytes, char, formatted), shrink-to-fit, and ownership transfer.
+  - Hash functions (`abs_hash`): FNV-1a 32/64 and djb2.
+  - Open-addressing string-keyed hash map (`abs_hashmap`) with tombstone deletion, resizing, and optional value free callbacks.
+  - Platform helpers: monotonic/wall-clock time (`abs_time`) and file I/O (`abs_fs`).
+  - Umbrella header `abscom/abs.h` and `ABS_API` export macros (`abs_common.h`).
+- Python-like runtime:
   - `var` object model with `v()` literal macro, `None`/`True`/`False`, and `List()`/`Dict()`/`Set()` constructors.
   - Memory-pool allocator for `AbsObj` values.
   - Printing (`print`/`print_end`), input, and arithmetic (`add`/`sub`/`mul`/`eq`).

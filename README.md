@@ -5,7 +5,7 @@
 <h1 align="center">Abscom</h1>
 
 <p align="center">
-  A C11 library of reusable data structures and platform utilities, plus a Python-inspired dynamic runtime (<code>ac_py</code>) for scripting-style C programs.
+  A C11 library of reusable data structures and platform utilities, plus a Python-inspired dynamic runtime for scripting-style C programs.
 </p>
 
 ## Badges
@@ -21,22 +21,22 @@
 
 ## Overview
 
-Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships `ac_py`, a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
+Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
 
 ## Screenshots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/home.png" alt="hello.c — the ac_py quick-start program" width="80%">
+  <img src="https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/home.png" alt="hello.c — the quick-start program" width="80%">
 </p>
 
 <p align="center">
-  <em>Quick start — the <code>ac_py</code> dynamic runtime in a few lines of C.</em>
+  <em>Quick start — the dynamic runtime in a few lines of C.</em>
 </p>
 
 <table align="center">
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/ac_py.png" alt="py_demo.c — dictionaries, JSON, sets, foreach, and classes" width="95%"><br><em>ac_py runtime</em></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/core.png" alt="core_demo.c — ac_string, ac_dynarray, ac_hashmap, ac_time, ac_fs" width="95%"><br><em>Core modules</em></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/abs_py.png" alt="py_demo.c — dictionaries, JSON, sets, foreach, and classes" width="95%"><br><em>Dynamic runtime</em></td>
+    <td align="center"><img src="https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/core.png" alt="core_demo.c — abs_string, abs_dynarray, abs_hashmap, abs_time, abs_fs" width="95%"><br><em>Core modules</em></td>
     <td align="center"><img src="https://raw.githubusercontent.com/rkriad585/Abscom/main/Screenshots/examples.png" alt="v6_demo.c — foreach, list_comp, and http_get" width="95%"><br><em>Example program</em></td>
   </tr>
 </table>
@@ -66,10 +66,10 @@ Abscom bundles low-level building blocks — dynamic arrays, growable strings, h
 ## Key Features
 
 - **Zero-dependency C11 library** — only the standard library, plus `ws2_32` on Windows for `http_get`.
-- **Data structures** — dynamic array (`ac_dynarray`), growable string (`ac_string`), and an open-addressing, string-keyed hash map (`ac_hashmap`) with tombstone deletion and automatic resizing.
-- **Hashing** — FNV-1a 32/64-bit and djb2 hash functions (`ac_hash`).
-- **Platform helpers** — monotonic/wall-clock time (`ac_time`) and file existence/read/write/remove/rename (`ac_fs`).
-- **Python-inspired runtime (`ac_py`)** — `var` objects created with the `v()` literal macro, plus `None` / `True` / `False`.
+- **Data structures** — dynamic array (`abs_dynarray`), growable string (`abs_string`), and an open-addressing, string-keyed hash map (`abs_hashmap`) with tombstone deletion and automatic resizing.
+- **Hashing** — FNV-1a 32/64-bit and djb2 hash functions (`abs_hash`).
+- **Platform helpers** — monotonic/wall-clock time (`abs_time`) and file existence/read/write/remove/rename (`abs_fs`).
+- **Python-inspired runtime** — `var` objects created with the `v()` literal macro, plus `None` / `True` / `False`.
 - **Containers** — lists, dictionaries, and deduplicating sets with union/difference/contains operations.
 - **Strings** — split/join, strip, case conversion, `startswith`/`endswith`, and `count`.
 - **JSON** — `json_parse` (objects, arrays, numbers, booleans, null, nested values) and `json_dump` with full escaping.
@@ -79,7 +79,7 @@ Abscom bundles low-level building blocks — dynamic arrays, growable strings, h
 - **Sequences** — `sorted` (ascending/descending), `reversed_seq`, `zip_lists`, `slice`, and `range`/`range_step`.
 - **OOP-lite** — `Class` / `New` / `set_attr` / `get_attr` for lightweight class-and-instance objects.
 - **System helpers** — `sleep_sec`, `time_now`, `exec_cmd`, and an HTTP/1.0 `http_get`.
-- **One umbrella header** — `abscom/ac.h` includes all core modules; `abscom/ac_py.h` exposes the dynamic runtime.
+- **One umbrella header** — `abscom/abs.h` exposes the core modules and the dynamic runtime.
 
 ## Installation
 
@@ -149,7 +149,7 @@ See [docs/installation.md](docs/installation.md) for platform notes.
 Save the following as `hello.c`:
 
 ```c
-#include "abscom/ac_py.h"
+#include "abscom/abs.h"
 
 int main(void) {
     abs_init();
@@ -243,8 +243,6 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | --- | --- |
 | [docs/getting-started.md](docs/getting-started.md) | First steps, prerequisites, and a walkthrough. |
 | [docs/installation.md](docs/installation.md) | Building, linking, and installing Abscom. |
-| [docs/usage.md](docs/usage.md) | Practical API recipes with output. |
-| [docs/api.md](docs/api.md) | Full reference for `ac.h` and `ac_py.h`. |
 | [docs/architecture.md](docs/architecture.md) | Module layout and how the pieces fit together. |
 | [docs/configuration.md](docs/configuration.md) | Build-time options and the (empty) runtime config story. |
 | [docs/development.md](docs/development.md) | Building, testing, and releasing. |
@@ -253,11 +251,47 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | [docs/faq.md](docs/faq.md) | Frequently asked questions. |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Common build and runtime problems. |
 
+### Core library
+
+| Document | Description |
+| --- | --- |
+| [common-macros.md](docs/common-macros.md) | `ABS_API`, C++ interop, and `ABS_UNUSED`. |
+| [dynamic-arrays.md](docs/dynamic-arrays.md) | `abs_dynarray` — generic dynamic array. |
+| [strings.md](docs/strings.md) | `abs_string` — growable NUL-terminated string. |
+| [hashing.md](docs/hashing.md) | `abs_hash` — FNV-1a and djb2. |
+| [hash-maps.md](docs/hash-maps.md) | `abs_hashmap` — open-addressing string-keyed map. |
+| [time.md](docs/time.md) | `abs_time` — monotonic and wall-clock timers. |
+| [file-io.md](docs/file-io.md) | `abs_fs` — file existence, read/write, remove, rename. |
+
+### Runtime
+
+| Document | Description |
+| --- | --- |
+| [lifecycle.md](docs/lifecycle.md) | `abs_init`, `abs_cleanup`, `del`, and the memory pool. |
+| [literals-and-constructors.md](docs/literals-and-constructors.md) | `v()`, `None`/`True`/`False`, `List`/`Dict`/`Set`. |
+| [types-and-conversions.md](docs/types-and-conversions.md) | `AbsType`, `type()`, `is_*`, `to_str`/`to_int`/`to_float`. |
+| [lists-and-ranges.md](docs/lists-and-ranges.md) | `append`, `get`, `len`, `range`, `range_step`, `slice`. |
+| [loops.md](docs/loops.md) | The `foreach` macro. |
+| [dictionaries.md](docs/dictionaries.md) | `dset`/`dget` and keyed lookups. |
+| [sets.md](docs/sets.md) | `set_add`, `set_contains`, `set_union`, `set_diff`. |
+| [string-methods.md](docs/string-methods.md) | `upper`/`lower`, `split`/`join`, `strip`, `startswith`/`endswith`, `count`. |
+| [formatting.md](docs/formatting.md) | `print`, `print_end`, `fmt`, `input`, and stringification. |
+| [json.md](docs/json.md) | `json_parse` and `json_dump`. |
+| [functional-helpers.md](docs/functional-helpers.md) | `map_func`, `filter_func`, `list_comp`. |
+| [random-utilities.md](docs/random-utilities.md) | `seed`, `randint`, `choice`, `sample`, `shuffle`, and more. |
+| [math-and-aggregates.md](docs/math-and-aggregates.md) | `min_val`/`max_val`/`sum_val`, `abs_val`, `pow_val`, `round_val`. |
+| [truthiness-and-logic.md](docs/truthiness-and-logic.md) | `is_true`, `not_`, `any`, `all`, `eq`. |
+| [sequences-and-sorting.md](docs/sequences-and-sorting.md) | `sorted`, `reversed_seq`, `zip_lists`. |
+| [oop-lite.md](docs/oop-lite.md) | `Class` / `New` / `set_attr` / `get_attr`. |
+| [runtime-files.md](docs/runtime-files.md) | `fopen_safe`, `read_file`, `write_file`, `close_file`. |
+| [system.md](docs/system.md) | `sleep_sec`, `time_now`, `exec_cmd`, `http_get`. |
+| [error-handling.md](docs/error-handling.md) | `abs_new_error`, `is_err`, and failure behavior. |
+
 ## Interface
 
-- **Core library** — include `<abscom/ac.h>` to get `ac_dynarray`, `ac_string`, `ac_hash`, `ac_hashmap`, `ac_time`, and `ac_fs` in one header.
-- **Dynamic runtime** — include `<abscom/ac_py.h>` for the Python-inspired `var` API (`ac_py`).
-- **ABI/export macros** — `AC_API` controls `__declspec(dllexport/dllimport)` on Windows and default visibility on GCC/Clang (`ac_common.h`).
+- **Core library** — include `<abscom/abs.h>` to get `abs_dynarray`, `abs_string`, `abs_hash`, `abs_hashmap`, `abs_time`, and `abs_fs` in one header.
+- **Dynamic runtime** — include `<abscom/abs.h>` for the Python-inspired `var` API.
+- **ABI/export macros** — `ABS_API` controls `__declspec(dllexport/dllimport)` on Windows and default visibility on GCC/Clang (`abs_common.h`).
 - The library is built as both a static library and a shared library by default (`both_libraries` in Meson).
 
 ## Architecture
@@ -265,14 +299,14 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 ```mermaid
 graph TD
     subgraph core["abscom core (src/, include/abscom/)"]
-        common[ac_common.h - API / ABI macros]
-        dyn[ac_dynarray - dynamic array]
-        str[ac_string - growable string]
-        hash[ac_hash - FNV-1a / djb2]
-        map[ac_hashmap - open-addressing map]
-        time[ac_time - monotonic / wall clock]
-        fs[ac_fs - file I/O]
-        py[ac_py - Python-like runtime]
+        common[abs_common.h - API / ABI macros]
+        dyn[abs_dynarray - dynamic array]
+        str[abs_string - growable string]
+        hash[abs_hash - FNV-1a / djb2]
+        map[abs_hashmap - open-addressing map]
+        time[abs_time - monotonic / wall clock]
+        fs[abs_fs - file I/O]
+        rt[abs - Python-like runtime]
     end
 
     subgraph users[""]
@@ -286,7 +320,7 @@ graph TD
     map --> hash
     time --> common
     fs --> common
-    py --> str
+    rt --> str
     tests --> core
     examples --> core
 ```
@@ -347,5 +381,5 @@ Abscom is released under the [MIT License](LICENSE).
 ## Acknowledgments
 
 - Built with [Meson](https://mesonbuild.com/) and [Ninja](https://ninja-build.org/).
-- `ac_py` is inspired by the ergonomics of the [Python](https://www.python.org/) language.
+- The dynamic runtime is inspired by the ergonomics of the [Python](https://www.python.org/) language.
 - Maintained by [rkriad585](https://github.com/rkriad585).

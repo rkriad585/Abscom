@@ -4,7 +4,7 @@ test_dep = declare_dependency(
   dependencies: ws_deps,
 )
 
-foreach t : ['test_dynarray', 'test_string', 'test_hash', 'test_hashmap', 'test_platform', 'test_py']
+foreach t : ['test_dynarray', 'test_string', 'test_hash', 'test_hashmap', 'test_platform', 'test_abs']
   exe = executable(t, t + '.c', dependencies: test_dep)
   test(t, exe)
 endforeach

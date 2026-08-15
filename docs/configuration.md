@@ -31,12 +31,12 @@ meson setup build -Dc_std=c11 -Dwarning_level=2
 
 | Macro | Where defined | Effect |
 | --- | --- | --- |
-| `AC_BUILDING_LIBRARY` | `meson.build` (`c_args`) | Marks the library build so `AC_API` expands to `__declspec(dllexport)` on Windows. |
-| `AC_USE_LIBRARY` | consumer builds (optional) | Marks a consumer so `AC_API` expands to `__declspec(dllimport)` on Windows. |
+| `ABS_BUILDING_LIBRARY` | `meson.build` (`c_args`) | Marks the library build so `ABS_API` expands to `__declspec(dllexport)` on Windows. |
+| `ABS_USE_LIBRARY` | consumer builds (optional) | Marks a consumer so `ABS_API` expands to `__declspec(dllimport)` on Windows. |
 | `_WIN32` | compiler | Enables the Windows code paths (Winsock, `Sleep`, QPC/FILETIME time). |
-| `POOL_BLOCK_SIZE` | `src/ac_py.c` (`#define POOL_BLOCK_SIZE 1024`) | Number of `AbsObj` slots per memory-pool block. |
+| `POOL_BLOCK_SIZE` | `src/abs.c` (`#define POOL_BLOCK_SIZE 1024`) | Number of `AbsObj` slots per memory-pool block. |
 
-These are internal to the implementation; application code only needs to know about `AC_API`'s behavior when building/consuming the shared library on Windows.
+These are internal to the implementation; application code only needs to know about `ABS_API`'s behavior when building/consuming the shared library on Windows.
 
 ## Sockets
 

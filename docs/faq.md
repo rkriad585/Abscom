@@ -2,11 +2,11 @@
 
 ## What is Abscom?
 
-Abscom is a C11 library of reusable data structures (dynamic arrays, strings, hash maps) and platform helpers (time, file I/O, hashing), plus `ac_py`, a Python-inspired dynamic runtime for writing scripting-style C programs. See [getting-started.md](getting-started.md).
+Abscom is a C11 library of reusable data structures (dynamic arrays, strings, hash maps) and platform helpers (time, file I/O, hashing), plus a Python-inspired dynamic runtime for writing scripting-style C programs. See [getting-started.md](getting-started.md).
 
 ## Do I need Python installed?
 
-No. `ac_py` is written in C and only borrows Python's *ergonomics* (`var`, `v(1)`, `List()`, `Dict()`, `print(...)`). It has no runtime dependency on Python.
+No. The runtime is written in C and only borrows Python's *ergonomics* (`var`, `v(1)`, `List()`, `Dict()`, `print(...)`). It has no runtime dependency on Python.
 
 ## What compilers are supported?
 
@@ -16,13 +16,13 @@ Any C11 compiler Meson supports. The code has Windows (`winsock2.h`, `windows.h`
 
 None beyond the C standard library. On Windows the build links `ws2_32` (for `http_get`); this is automatic via Meson.
 
-## Why does `ac_py` use a memory pool?
+## Why does the runtime use a memory pool?
 
 Most `AbsObj` values are allocated from a block pool (`POOL_BLOCK_SIZE` per block) so constructing `var` objects is cheap and there is no per-object `malloc` overhead. Objects with heap internals are tracked separately and freed by `abs_cleanup` / `del`.
 
 ## Do I have to call `abs_init` / `abs_cleanup`?
 
-Call `abs_init()` once before using any `ac_py` function — it seeds the RNG and starts Winsock on Windows. Call `abs_cleanup()` before exiting to release pool blocks and internals (and to call `WSACleanup`). The core modules (`ac_dynarray`, `ac_string`, `ac_hashmap`, ...) do not require it.
+Call `abs_init()` once before using any runtime function — it seeds the RNG and starts Winsock on Windows. Call `abs_cleanup()` before exiting to release pool blocks and internals (and to call `WSACleanup`). The core modules (`abs_dynarray`, `abs_string`, `abs_hashmap`, ...) do not require it.
 
 ## Does `del()` free memory?
 
@@ -34,7 +34,7 @@ Call `abs_init()` once before using any `ac_py` function — it seeds the RNG an
 
 ## How are errors reported?
 
-Core modules return non-zero/`NULL`. `ac_py` returns `ABS_ERROR` objects — check them with `is_err(obj)`. For example, `get(list, 100)` and `json_parse("bad")` return errors.
+Core modules return non-zero/`NULL`. The runtime returns `ABS_ERROR` objects — check them with `is_err(obj)`. For example, `get(list, 100)` and `json_parse("bad")` return errors.
 
 ## Why does `http_get` sometimes fail?
 

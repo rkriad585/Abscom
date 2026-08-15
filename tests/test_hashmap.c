@@ -1,4 +1,4 @@
-#include "abscom/ac_hashmap.h"
+#include "abscom/abs_hashmap.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,16 +20,16 @@ static void free_box(void *p) {
 }
 
 static int count_cb(const char *key, void *value, void *user) {
-    AC_UNUSED(key);
-    AC_UNUSED(value);
+    ABS_UNUSED(key);
+    ABS_UNUSED(value);
     (*(size_t *)user)++;
     return 0;
 }
 
 int main(void) {
-    ac_hashmap_t *m = ac_hashmap_create(free_box);
+    abs_hashmap_t *m = abs_hashmap_create(free_box);
     CHECK(m != NULL);
-    CHECK(ac_hashmap_size(m) == 0);
+    CHECK(abs_hashmap_size(m) == 0);
 
     for (int i = 0; i < 1000; i++) {
         char key[32];
@@ -37,29 +37,29 @@ int main(void) {
         box_t *b = (box_t *)malloc(sizeof(*b));
         CHECK(b != NULL);
         b->v = i;
-        CHECK(ac_hashmap_set(m, key, b) == 0);
+        CHECK(abs_hashmap_set(m, key, b) == 0);
     }
-    CHECK(ac_hashmap_size(m) == 1000);
+    CHECK(abs_hashmap_size(m) == 1000);
 
     for (int i = 0; i < 1000; i++) {
         char key[32];
         snprintf(key, sizeof(key), "key-%d", i);
-        CHECK(ac_hashmap_contains(m, key));
-        box_t *b = (box_t *)ac_hashmap_get(m, key);
+        CHECK(abs_hashmap_contains(m, key));
+        box_t *b = (box_t *)abs_hashmap_get(m, key);
         CHECK(b != NULL && b->v == i);
     }
-    CHECK(!ac_hashmap_contains(m, "missing"));
-    CHECK(ac_hashmap_get(m, "missing") == NULL);
+    CHECK(!abs_hashmap_contains(m, "missing"));
+    CHECK(abs_hashmap_get(m, "missing") == NULL);
 
     for (int i = 0; i < 1000; i += 2) {
         char key[32];
         snprintf(key, sizeof(key), "key-%d", i);
-        CHECK(ac_hashmap_remove(m, key) == 0);
+        CHECK(abs_hashmap_remove(m, key) == 0);
     }
-    CHECK(ac_hashmap_size(m) == 500);
-    CHECK(!ac_hashmap_contains(m, "key-0"));
-    CHECK(ac_hashmap_contains(m, "key-1"));
-    CHECK(ac_hashmap_remove(m, "key-0") == -1);
+    CHECK(abs_hashmap_size(m) == 500);
+    CHECK(!abs_hashmap_contains(m, "key-0"));
+    CHECK(abs_hashmap_contains(m, "key-1"));
+    CHECK(abs_hashmap_remove(m, "key-0") == -1);
 
     for (int i = 0; i < 1000; i += 2) {
         char key[32];
@@ -67,25 +67,25 @@ int main(void) {
         box_t *b = (box_t *)malloc(sizeof(*b));
         CHECK(b != NULL);
         b->v = i;
-        CHECK(ac_hashmap_set(m, key, b) == 0);
+        CHECK(abs_hashmap_set(m, key, b) == 0);
     }
-    CHECK(ac_hashmap_size(m) == 1000);
+    CHECK(abs_hashmap_size(m) == 1000);
     for (int i = 0; i < 1000; i++) {
         char key[32];
         snprintf(key, sizeof(key), "key-%d", i);
-        box_t *b = (box_t *)ac_hashmap_get(m, key);
+        box_t *b = (box_t *)abs_hashmap_get(m, key);
         CHECK(b != NULL && b->v == i);
     }
 
     {
         size_t seen = 0;
-        ac_hashmap_foreach(m, count_cb, &seen);
+        abs_hashmap_foreach(m, count_cb, &seen);
         CHECK(seen == 1000);
     }
 
-    ac_hashmap_clear(m);
-    CHECK(ac_hashmap_size(m) == 0);
-    ac_hashmap_destroy(m);
+    abs_hashmap_clear(m);
+    CHECK(abs_hashmap_size(m) == 0);
+    abs_hashmap_destroy(m);
 
     printf("test_hashmap: OK\n");
     return 0;
