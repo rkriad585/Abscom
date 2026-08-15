@@ -106,6 +106,38 @@ int main(void) {
     }
 
     {
+        /* fisher_yates() is shuffle() under its classic name; riffle_shuffle()
+         * splits the deck in half and interleaves the piles. Both must keep the
+         * size and the multiset of values intact. */
+        int i;
+        for (i = 0; i < 3; i++) {
+            var deck = List();
+            int k;
+            for (k = 0; k < 6; k++) append(deck, v(k));
+            fisher_yates(deck);
+            CHECK(deck->val.list.size == 6);
+            for (k = 0; k < 6; k++)
+                CHECK(get(deck, k)->val.i >= 0 && get(deck, k)->val.i < 6);
+        }
+        var rdeck = List();
+        for (i = 0; i < 8; i++) append(rdeck, v(i));
+        riffle_shuffle(rdeck);
+        CHECK(rdeck->val.list.size == 8);
+        {
+            int found[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+            int k;
+            for (k = 0; k < 8; k++) {
+                long val = get(rdeck, k)->val.i;
+                CHECK(val >= 0 && val < 8);
+                found[val]++;
+            }
+            for (k = 0; k < 8; k++) CHECK(found[k] == 1);
+        }
+        riffle_shuffle(v(42));            /* non-list: no-op */
+        riffle_shuffle(List());           /* empty list: no-op */
+    }
+
+    {
         var r = range(0, 5);
         CHECK(r != NULL && r->type == ABS_LIST && r->val.list.size == 5);
         CHECK(get(r, 0)->val.i == 0);

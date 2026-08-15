@@ -1,6 +1,7 @@
 #include "abscom/abs.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #define CHECK(cond)                                                          \
     do {                                                                     \
@@ -59,6 +60,29 @@ int main(void) {
     CHECK(is_none(iter_next(bad)));
     var empty_cy = cycle(v(99));
     CHECK(is_none(iter_next(empty_cy)));
+
+    /* repeat(V, N): yields V exactly N times, then None forever. */
+    var rep = repeat(v(7), 3);
+    CHECK(rep != NULL && rep->type == ABS_ITERATOR);
+    CHECK(next_int(rep) == 7);
+    CHECK(next_int(rep) == 7);
+    CHECK(next_int(rep) == 7);
+    CHECK(is_none(iter_next(rep)));
+    CHECK(is_none(iter_next(rep))); /* stays exhausted */
+
+    /* repeat of a string value works too. */
+    var reps = repeat(v("hi"), 2);
+    var s1 = iter_next(reps);
+    CHECK(s1->type == ABS_STR && strcmp(s1->val.s, "hi") == 0);
+    var s2 = iter_next(reps);
+    CHECK(s2->type == ABS_STR && strcmp(s2->val.s, "hi") == 0);
+    CHECK(is_none(iter_next(reps)));
+
+    /* repeat with n <= 0 yields nothing. */
+    var rep0 = repeat(v(1), 0);
+    CHECK(is_none(iter_next(rep0)));
+    var repneg = repeat(v(1), -5);
+    CHECK(is_none(iter_next(repneg)));
 
     abs_cleanup();
     return 0;

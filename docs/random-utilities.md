@@ -34,8 +34,10 @@ random_seed();     /* different every run  */
 | `var choices(var seq, int k)` | A new list of `k` random items/chars (repetition allowed). |
 | `var sample(var seq, int k)` | A new list of `k` unique random items (lists only). |
 | `void shuffle(var list)` | Randomize a list **in place** (returns nothing). |
+| `void fisher_yates(var list)` | Same algorithm as `shuffle`, under its classic name. |
+| `void riffle_shuffle(var list)` | In-place shuffle that splits the list in half and randomly interleaves the two piles (a card-deck riffle). |
 
-Empty-sequence `choice`/`choices` and `k`-too-large `sample` produce `ABS_ERROR`. `sample` and `shuffle` accept lists only.
+Empty-sequence `choice`/`choices` and `k`-too-large `sample` produce `ABS_ERROR`. `sample`, `shuffle`, `fisher_yates`, and `riffle_shuffle` accept lists only; on non-lists they are no-ops.
 
 ## Example
 
@@ -55,6 +57,11 @@ var uniq = sample(xs, 3);     /* new list, 3 unique items */
 shuffle(xs);                  /* xs itself is permuted  */
 print(uniq);
 print(xs);
+
+var deck = range(0, 13);      /* a hand of cards... */
+riffle_shuffle(deck);         /* ...cut and interleaved */
+fisher_yates(deck);           /* ...or fully randomized */
+print(deck);
 ```
 
 Back to [README](https://github.com/rkriad585/Abscom/blob/main/README.md).

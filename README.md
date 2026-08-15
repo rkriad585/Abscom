@@ -21,7 +21,7 @@
 
 ## Overview
 
-Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C, plus a scientific layer with matrices, statistics, advanced math, CSV, path helpers, and basic threading. A language-features layer adds exceptions (`try`/`catch`), context managers (`with`), regex, date/time, generators, base64/UUID, and environment variables. A framework layer tops it off with a micro web server, an event emitter, dynamic plugins, function objects with memoization and decorators, introspection, and itertools-style iterators. An algorithm suite rounds it out with twelve sorting algorithms, a swap-hook visualizer, `timeit` benchmarking, and binary search. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
+Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C, plus a scientific layer with matrices, statistics, advanced math, CSV, path helpers, and basic threading. A language-features layer adds exceptions (`try`/`catch`), context managers (`with`), regex, date/time, generators, base64/UUID, and environment variables. A framework layer tops it off with a micro web server, an event emitter, dynamic plugins, function objects with memoization and decorators, introspection, and itertools-style iterators. An algorithm suite rounds it out with twelve sorting algorithms, a swap-hook visualizer, `timeit` benchmarking, and binary search. A realtime-and-crypto layer adds RFC 6455 WebSockets (handshake and framing) plus from-scratch SHA-256 and HMAC-SHA-256. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
 
 ## Screenshots
 
@@ -101,6 +101,10 @@ Abscom bundles low-level building blocks — dynamic arrays, growable strings, h
 - **Visualizer** — `sort_bubble_visual` calls an `AbsSortVis` hook on every swap for logs or animations.
 - **Benchmarking** — `timeit` times any sort on a deep-copied list without touching the original.
 - **Search** — `binary_search` for sorted lists, plus `is_sorted` and `list_copy` helpers.
+- **WebSockets** — RFC 6455 `ws_accept` handshake (real SHA-1), `ws_send` / `ws_recv` text framing, and public `ws_compute_accept` / `ws_encode_frame` / `ws_decode_frame` helpers for testing the wire format socket-free.
+- **Cryptography** — from-scratch `sha256` and `hmac_sha256` (FIPS 180-4 / RFC 2104), pinned to known-answer test vectors.
+- **More shuffling** — `fisher_yates` (the classic name for `shuffle`) and a card-deck `riffle_shuffle` that cuts and interleaves the list.
+- **Iterators** — `chain`, `cycle`, and `repeat` consumed via `iter_next`.
 - **One umbrella header** — `abscom/abs.h` exposes the core modules and the dynamic runtime.
 
 ## Installation
@@ -333,7 +337,28 @@ sort_quick(data);                        /* in place */
 print(v("Found at index:"), v(binary_search(data, v(500))));
 ```
 
-More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`, `sci_demo.c`, `lang_demo.c`, `framework_demo.c`, `sort_demo.c`) and are built as `build/examples/<name>`.
+### WebSockets, hashing, and iterators
+
+```c
+var h = sha256("password");              /* 5e884898... */
+print(h);
+print(hmac_sha256("secret", "message"));
+
+print(ws_compute_accept("dGhlIHNhbXBsZSBub25jZQ=="));   /* s3pPLMBiTxaQ9kYGzzhZRbK+xOo= */
+
+char frame[32], out[32];
+size_t n = ws_encode_frame(frame, sizeof(frame), "Hello"); /* 81 05 48 65 6c 6c 6f */
+long len = ws_decode_frame(frame, n, out, sizeof(out));    /* 5 */
+
+var deck = range(0, 13);
+riffle_shuffle(deck);                    /* cut and interleave */
+fisher_yates(deck);                      /* full randomization */
+
+var rep = repeat(v("beep"), 3);          /* repeat() iterator */
+print(iter_next(rep));                   /* beep */
+```
+
+More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`, `sci_demo.c`, `lang_demo.c`, `framework_demo.c`, `sort_demo.c`, `crypto_demo.c`) and are built as `build/examples/<name>`.
 
 ## Documentation
 
@@ -418,6 +443,13 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | --- | --- |
 | [sorting.md](docs/sorting.md) | Twelve sorting algorithms, `sort_bubble_visual`, `timeit`, and `binary_search`. |
 
+### Realtime & crypto
+
+| Document | Description |
+| --- | --- |
+| [websockets.md](docs/websockets.md) | RFC 6455 `ws_accept`, `ws_send`, `ws_recv`, and the framing helpers. |
+| [crypto.md](docs/crypto.md) | `sha256` and `hmac_sha256` (FIPS 180-4 / RFC 2104). |
+
 ## Interface
 
 - **Core library** — include `<abscom/abs.h>` to get `abs_dynarray`, `abs_string`, `abs_hash`, `abs_hashmap`, `abs_time`, and `abs_fs` in one header.
@@ -442,6 +474,7 @@ graph TD
         lang[abs_except, abs_regex, abs_datetime, abs_gen, abs_encode, abs_env - language features]
         fw[abs_server, abs_events, abs_plugins, abs_func, abs_introspect, abs_itertools - framework]
         algo[abs_sort - sorting, benchmarking, binary search]
+        rt2[abs_crypto, abs_ws - SHA-256 / HMAC, WebSockets]
     end
 
     subgraph users["Consumers"]
@@ -460,6 +493,7 @@ graph TD
     lang --> rt
     fw --> rt
     algo --> rt
+    rt2 --> rt
     tests --> core
     examples --> core
 ```
@@ -507,6 +541,7 @@ Run the example programs:
 ./build/examples/lang_demo
 ./build/examples/framework_demo
 ./build/examples/sort_demo
+./build/examples/crypto_demo
 ```
 
 See [docs/development.md](docs/development.md) for details.

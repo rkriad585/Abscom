@@ -10,6 +10,7 @@ Lazy iterators over lists, following the spirit of Python's `itertools`. Both li
 | --- | --- |
 | `var chain(var list_a, var list_b)` | Yield every element of `a`, then every element of `b`. |
 | `var cycle(var list)` | Yield a list's elements forever, wrapping at the end. |
+| `var repeat(var val, int n)` | Yield `val` exactly `n` times, then `None` forever. |
 | `var iter_next(var iter)` | The next element, or `None` once the iterator is exhausted. |
 
 ```c
@@ -30,11 +31,18 @@ print(iter_next(cy));   /* 1 */
 print(iter_next(cy));   /* 2 */
 print(iter_next(cy));   /* 1 */
 print(iter_next(cy));   /* 2 */
+
+var r = repeat(v("beep"), 3);
+print(iter_next(r));   /* beep */
+print(iter_next(r));   /* beep */
+print(iter_next(r));   /* beep */
+print(iter_next(r));   /* None */
 ```
 
 Notes:
 
 - `chain` treats a non-list source as empty, so `chain(a, None)` just drains `a`. `cycle` on an empty or non-list source yields `None` forever.
+- `repeat` with `n <= 0` yields nothing. The repeated value is emitted as-is, so `repeat(None, 3)` is indistinguishable from an exhausted iterator.
 - `iter_next` on a non-iterator returns `ABS_ERROR`.
 
 See `tests/test_itertools.c` for the full test.

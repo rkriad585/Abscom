@@ -1162,6 +1162,28 @@ void shuffle(var list) {
     }
 }
 
+void fisher_yates(var list) {
+    shuffle(list); /* Fisher-Yates under its classic name */
+}
+
+void riffle_shuffle(var list) {
+    if (!list || list->type != ABS_LIST) return;
+    size_t n = list->val.list.size;
+    if (n < 2) return;
+    size_t mid = n / 2;
+    var temp = abs_new_list();
+    size_t i = 0, j = mid;
+    while (i < mid || j < n) {
+        if (i < mid && (j >= n || rand() % 2 == 0)) {
+            append(temp, list->val.list.items[i++]);
+        } else if (j < n) {
+            append(temp, list->val.list.items[j++]);
+        }
+    }
+    for (size_t k = 0; k < n; k++)
+        list->val.list.items[k] = temp->val.list.items[k];
+}
+
 var sample(var seq, int k) {
     if (!seq || seq->type != ABS_LIST)
         return abs_new_error("Sample currently only supports lists");

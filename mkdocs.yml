@@ -90,6 +90,9 @@ nav:
       - Itertools: itertools.md
   - Algorithm Suite:
       - Sorting, Search, and Benchmarking: sorting.md
+  - Realtime & Crypto:
+      - WebSockets: websockets.md
+      - Cryptography: crypto.md
   - Architecture: architecture.md
   - Configuration: configuration.md
   - Development: development.md

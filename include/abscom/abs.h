@@ -49,6 +49,9 @@ typedef var (*AbsFunc)(var); /* standard signature: var -> var */
 /* Opaque handle to a shared library: HMODULE on Windows, void* on POSIX. */
 typedef void *LibHandle;
 
+/* Socket handle used by the WebSocket API: SOCKET on Windows, int on POSIX. */
+typedef intptr_t abs_socket;
+
 typedef struct DictNode {
     char *key;
     AbsObj *value;
@@ -116,8 +119,10 @@ typedef struct AbsObj {
         } func;
         struct {
             AbsObj *source_a;
-            AbsObj *source_b; /* NULL for cycle() */
+            AbsObj *source_b; /* NULL for cycle() and repeat() */
             long index;
+            int mode;         /* 0=chain, 1=cycle, 2=repeat */
+            long limit;       /* repeat() emission count; unused otherwise */
         } iter;
         FILE *file_ptr;
         char *error_msg;
@@ -448,6 +453,36 @@ ABS_API double timeit(void (*sort_func)(var), var list);
 
 /* Binary search on a sorted list; returns the index or -1. */
 ABS_API long binary_search(var sorted_list, var target);
+
+/* --- Realtime & crypto layer: WebSockets, hashing, shuffling, repeat --- */
+
+/* SHA-256 (hex) and keyed HMAC-SHA-256 (hex), returned as ABS_STR values. */
+ABS_API var sha256(const char *input);
+ABS_API var hmac_sha256(const char *key, const char *msg);
+
+/* Server-side WebSocket handshake on an accepted client socket: parses the
+ * Sec-WebSocket-Key out of the HTTP request, sends back the 101 response, and
+ * returns whether the handshake succeeded. */
+ABS_API bool ws_accept(abs_socket client_fd, const char *request_str);
+/* RFC 6455: base64(SHA1(key + magic GUID)) — the Sec-WebSocket-Accept value. */
+ABS_API var ws_compute_accept(const char *key);
+/* Encode msg into a server->client text frame at out; returns total bytes. */
+ABS_API size_t ws_encode_frame(char *out, size_t cap, const char *msg);
+/* Decode one text frame (masked client frame or unmasked server frame) into
+ * out; returns the payload length, or -1 when the frame is malformed. */
+ABS_API long ws_decode_frame(const char *buf, size_t buf_len, char *out,
+                             size_t out_cap);
+/* Send msg to fd as a text frame, and receive one frame as an ABS_STR. */
+ABS_API void ws_send(abs_socket fd, const char *msg);
+ABS_API var ws_recv(abs_socket fd);
+
+/* Shuffling: fisher_yates() is shuffle() under its classic name; riffle_shuffle
+ * splits the deck in half and randomly interleaves the two piles. */
+ABS_API void fisher_yates(var list);
+ABS_API void riffle_shuffle(var list);
+
+/* Itertools: repeat(val, n) yields val n times, then None. */
+ABS_API var repeat(var val, int n);
 
 ABS_END_C_DECLS
 

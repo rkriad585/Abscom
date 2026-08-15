@@ -44,6 +44,8 @@ srcs = files(
   'src/abs_introspect.c',
   'src/abs_itertools.c',
   'src/abs_sort.c',
+  'src/abs_crypto.c',
+  'src/abs_ws.c',
   'src/abs.c',
 )
 

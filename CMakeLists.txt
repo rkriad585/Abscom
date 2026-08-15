@@ -40,6 +40,8 @@ set(ABSCOM_SOURCES
   src/abs_introspect.c
   src/abs_itertools.c
   src/abs_sort.c
+  src/abs_crypto.c
+  src/abs_ws.c
   src/abs.c
 )
 
@@ -108,7 +110,7 @@ if(ABSCOM_BUILD_TESTS)
                    test_matrix test_stats test_csv test_path test_thread
                    test_regex test_except test_datetime test_gen test_encode test_env
                    test_server test_events test_plugins test_func test_introspect test_itertools
-                   test_sort)
+                   test_sort test_crypto test_ws)
     add_executable(${t} tests/${t}.c)
     target_link_libraries(${t} PRIVATE abscom_static)
     add_test(NAME ${t} COMMAND ${t})
@@ -116,7 +118,7 @@ if(ABSCOM_BUILD_TESTS)
 endif()
 
 if(ABSCOM_BUILD_EXAMPLES)
-  foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo)
+  foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo crypto_demo)
     add_executable(${ex} examples/${ex}.c)
     target_link_libraries(${ex} PRIVATE abscom_static)
   endforeach()

@@ -62,5 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Visualization: `sort_bubble_visual` calls an `AbsSortVis` hook on every swap.
   - Benchmarking: `timeit` times any sort function on a deep-copied list and returns seconds.
   - Search and helpers: `binary_search` for sorted lists, plus `is_sorted` and `list_copy`.
-- Build system: Meson project with static + shared libraries, twenty-four tests, and eight example programs.
-- Documentation: README, `docs/` (including the language-features, framework, and algorithm-suite pages), logo, and standard project files.
+- Realtime and crypto layer:
+  - WebSockets (`abs_ws.c`): RFC 6455 server handshake (`ws_accept`, with a real SHA-1 implementation), text-frame send/receive (`ws_send`/`ws_recv`, masked client frames unmasked on receipt), and socket-free `ws_compute_accept` / `ws_encode_frame` / `ws_decode_frame` helpers for tests. New `abs_socket` handle (SOCKET on Windows, `int` on POSIX).
+  - Cryptography (`abs_crypto.c`): from-scratch `sha256` and `hmac_sha256` (FIPS 180-4 / RFC 2104), returned as lowercase hex strings and pinned to known-answer test vectors.
+  - Shuffling (`abs.c`): `fisher_yates` (classic name for `shuffle`) and `riffle_shuffle`, which cuts a list in half and randomly interleaves the two piles.
+  - Itertools (`abs_itertools.c`): `repeat(val, n)` iterator alongside `chain`/`cycle`, all driven by `iter_next`.
+- Build system: Meson project with static + shared libraries, twenty-six tests, and nine example programs.
+- Documentation: README, `docs/` (including the language-features, framework, algorithm-suite, and realtime-and-crypto pages), logo, and standard project files.

@@ -53,6 +53,8 @@ SRCS := \
 	src/abs_introspect.c \
 	src/abs_itertools.c \
 	src/abs_sort.c \
+	src/abs_crypto.c \
+	src/abs_ws.c \
 	src/abs.c
 OBJS := $(patsubst src/%.c,$(OBJDIR)/%.o,$(SRCS))
 
@@ -60,8 +62,8 @@ TESTS    := test_dynarray test_string test_hash test_hashmap test_platform test_
             test_matrix test_stats test_csv test_path test_thread \
             test_regex test_except test_datetime test_gen test_encode test_env \
             test_server test_events test_plugins test_func test_introspect test_itertools \
-            test_sort
-EXAMPLES := demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo
+            test_sort test_crypto test_ws
+EXAMPLES := demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo crypto_demo
 
 # Windows (MinGW/MSYS) links ws2_32; POSIX links libm and pthreads.
 ifeq ($(OS),Windows_NT)
