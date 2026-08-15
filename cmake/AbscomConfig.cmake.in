@@ -1,0 +1,19 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if(NOT WIN32)
+  find_dependency(Threads)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/AbscomTargets.cmake")
+
+if(NOT TARGET abscom::abscom)
+  if(TARGET abscom::abscom_static)
+    add_library(abscom::abscom ALIAS abscom::abscom_static)
+  elseif(TARGET abscom::abscom_shared)
+    add_library(abscom::abscom ALIAS abscom::abscom_shared)
+  endif()
+endif()
+
+check_required_components(abscom)

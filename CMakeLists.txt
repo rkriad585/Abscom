@@ -11,7 +11,8 @@ set(CMAKE_C_EXTENSIONS ON)
 
 include(GNUInstallDirs)
 
-option(ABSCOM_BUILD_SHARED   "Build the shared library in addition to the static one" ON)
+option(ABSCOM_BUILD_STATIC   "Build the static library" ON)
+option(ABSCOM_BUILD_SHARED   "Build the shared library" ON)
 option(ABSCOM_BUILD_TESTS    "Build the test suite" ON)
 option(ABSCOM_BUILD_EXAMPLES "Build the examples" ON)
 
@@ -83,16 +84,18 @@ else()
 endif()
 
 # Static library - the primary target used by the tests and examples.
-add_library(abscom_static STATIC ${ABSCOM_SOURCES})
-target_include_directories(abscom_static
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_compile_definitions(abscom_static PRIVATE ABS_BUILDING_LIBRARY)
-target_link_libraries(abscom_static PUBLIC ${ABSCOM_PLATFORM_LIBS})
-set_target_properties(abscom_static PROPERTIES
-  OUTPUT_NAME abscom
-  POSITION_INDEPENDENT_CODE ON)
+if(ABSCOM_BUILD_STATIC)
+  add_library(abscom_static STATIC ${ABSCOM_SOURCES})
+  target_include_directories(abscom_static
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  target_compile_definitions(abscom_static PRIVATE ABS_BUILDING_LIBRARY)
+  target_link_libraries(abscom_static PUBLIC ${ABSCOM_PLATFORM_LIBS})
+  set_target_properties(abscom_static PROPERTIES
+    OUTPUT_NAME abscom
+    POSITION_INDEPENDENT_CODE ON)
+endif()
 
 if(ABSCOM_BUILD_SHARED)
   add_library(abscom_shared SHARED ${ABSCOM_SOURCES})
@@ -111,7 +114,7 @@ if(ABSCOM_BUILD_SHARED)
     WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-if(ABSCOM_BUILD_TESTS)
+if(ABSCOM_BUILD_TESTS AND ABSCOM_BUILD_STATIC)
   enable_testing()
   foreach(t IN ITEMS test_dynarray test_string test_hash test_hashmap test_platform test_abs
                    test_matrix test_ml test_stats test_math test_csv test_path test_thread
@@ -124,14 +127,17 @@ if(ABSCOM_BUILD_TESTS)
   endforeach()
 endif()
 
-if(ABSCOM_BUILD_EXAMPLES)
+if(ABSCOM_BUILD_EXAMPLES AND ABSCOM_BUILD_STATIC)
   foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo crypto_demo ml_demo ml_train_demo math_demo ds_demo ultra_demo geom_demo demo_macros)
     add_executable(${ex} examples/${ex}.c)
     target_link_libraries(${ex} PRIVATE abscom_static)
   endforeach()
 endif()
 
-set(ABSCOM_INSTALL_TARGETS abscom_static)
+set(ABSCOM_INSTALL_TARGETS "")
+if(ABSCOM_BUILD_STATIC)
+  list(APPEND ABSCOM_INSTALL_TARGETS abscom_static)
+endif()
 if(ABSCOM_BUILD_SHARED)
   list(APPEND ABSCOM_INSTALL_TARGETS abscom_shared)
 endif()
@@ -147,6 +153,21 @@ install(FILES ${ABSCOM_PUBLIC_HEADERS}
 
 install(EXPORT AbscomTargets
   NAMESPACE abscom::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Abscom)
+
+# Package config so consumers can use find_package(abscom CONFIG).
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  cmake/AbscomConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/AbscomConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Abscom)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/AbscomConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/AbscomConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/AbscomConfigVersion.cmake"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Abscom)
 
 # pkg-config file, mirroring the one the Meson build generates.
