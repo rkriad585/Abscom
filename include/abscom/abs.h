@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <time.h>
 #include <setjmp.h>
@@ -962,7 +963,7 @@ static inline double abs_smoothstep(double e0, double e1, double x) {
 
 /* Array, memory, and struct utilities. */
 #define ABS_ARRAY_LEN(arr)        (sizeof(arr) / sizeof((arr)[0]))
-#define ABS_OFFSETOF(type, member) ((size_t)&(((type *)0)->member))
+#define ABS_OFFSETOF(type, member) offsetof(type, member)
 #define ABS_CONTAINER_OF(ptr, type, member) \
     ((type *)((char *)(ptr) - ABS_OFFSETOF(type, member)))
 

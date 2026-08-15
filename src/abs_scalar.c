@@ -2,7 +2,7 @@
  * with reverse-mode differentiation (backpropagation). Nodes are plain heap
  * objects, not GC-tracked var values; freeing the root releases the whole
  * graph. The graph may share subtrees - backward() and free() both tolerate
- * that via the visited/freed flags on each node. */
+ * that by traversing with the visited flag before touching any node. */
 
 #include "abscom/abs.h"
 
@@ -22,8 +22,7 @@ struct AbsScalar {
     double grad;
     struct AbsScalar *parents[2];
     int op;
-    int visited;  /* traversal marker for backward()/zero_grad() */
-    int freed;    /* abs_scalar_free() guard against shared subtrees */
+    int visited;  /* traversal marker for backward()/zero_grad()/free() */
 };
 
 static void abs_scalar_clear_visited(AbsScalar *v) {
@@ -43,7 +42,6 @@ static AbsScalar *abs_scalar_node(double val, int op,
     v->parents[1] = b;
     v->op = op;
     v->visited = 0;
-    v->freed = 0;
     return v;
 }
 
@@ -152,9 +150,19 @@ void abs_scalar_backward(AbsScalar *root) {
 }
 
 void abs_scalar_free(AbsScalar *root) {
-    if (!root || root->freed) return;
-    root->freed = 1;
-    abs_scalar_free(root->parents[0]);
-    abs_scalar_free(root->parents[1]);
-    free(root);
+    if (!root) return;
+
+    /* Freeing the root releases the whole graph. Shared subtrees must be
+     * freed exactly once, so first collect every unique reachable node into
+     * an array while all of them are still allocated, then free that list.
+     * A guard stored inside a node cannot work here: once a node is freed,
+     * reading its guard back is itself a use-after-free. */
+    int n = abs_scalar_count(root);
+    abs_scalar_clear_visited(root);
+    AbsScalar **order = (AbsScalar **)malloc((size_t)n * sizeof(AbsScalar *));
+    if (!order) return; /* OOM: leak rather than read freed memory */
+    int count = 0;
+    abs_scalar_build_order(root, order, &count, n);
+    for (int i = 0; i < count; i++) free(order[i]);
+    free(order);
 }

@@ -65,7 +65,7 @@ double s = ABS_SMOOTHSTEP(0.0, 1.0, 0.75);     /* 0.84375 */
 | Macro | Result |
 | --- | --- |
 | `ABS_ARRAY_LEN(arr)` | number of elements in a stack array (`sizeof(arr) / sizeof(arr[0])`) |
-| `ABS_OFFSETOF(type, member)` | byte offset of `member` within `type` (no `<stddef.h>` dependency) |
+| `ABS_OFFSETOF(type, member)` | byte offset of `member` within `type` (standard `offsetof` from `<stddef.h>`) |
 | `ABS_CONTAINER_OF(ptr, type, member)` | recover the enclosing struct pointer from a member pointer |
 
 ```c
