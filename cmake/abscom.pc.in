@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: abscom
+Description: A C11 library of reusable data structures and a Python-inspired dynamic runtime
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -labscom
+Cflags: -I${includedir}

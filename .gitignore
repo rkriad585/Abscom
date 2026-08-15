@@ -1,6 +1,8 @@
 # Build output
 build/
 builddir/
+build-cmake/
+build-make/
 
 # Compiled objects and libraries
 *.o

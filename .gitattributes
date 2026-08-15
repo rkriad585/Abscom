@@ -7,6 +7,19 @@
 *.md text eol=lf
 meson.build text eol=lf
 *.toml text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+Makefile text eol=lf
+*.mk text eol=lf
+CMakeLists.txt text eol=lf
+*.cmake text eol=lf
+*.pc text eol=lf
+*.pc.in text eol=lf
+.gitattributes text eol=lf
+.gitignore text eol=lf
 
 # Binaries and archives.
 *.a binary

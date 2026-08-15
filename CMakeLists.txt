@@ -1,0 +1,116 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(abscom
+  VERSION 0.1.0
+  DESCRIPTION "A C11 library of reusable data structures and a Python-inspired dynamic runtime"
+  LANGUAGES C)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
+
+include(GNUInstallDirs)
+
+option(ABSCOM_BUILD_SHARED   "Build the shared library in addition to the static one" ON)
+option(ABSCOM_BUILD_TESTS    "Build the test suite" ON)
+option(ABSCOM_BUILD_EXAMPLES "Build the examples" ON)
+
+set(ABSCOM_SOURCES
+  src/abs_dynarray.c
+  src/abs_string.c
+  src/abs_hash.c
+  src/abs_hashmap.c
+  src/abs_time.c
+  src/abs_fs.c
+  src/abs.c
+)
+
+set(ABSCOM_PUBLIC_HEADERS
+  include/abscom/abs.h
+  include/abscom/abs_common.h
+  include/abscom/abs_dynarray.h
+  include/abscom/abs_string.h
+  include/abscom/abs_hash.h
+  include/abscom/abs_hashmap.h
+  include/abscom/abs_time.h
+  include/abscom/abs_fs.h
+)
+
+# Platform libraries: ws2_32 for sockets on Windows, libm elsewhere.
+set(ABSCOM_PLATFORM_LIBS "")
+if(WIN32)
+  list(APPEND ABSCOM_PLATFORM_LIBS ws2_32)
+else()
+  find_library(ABSCOM_MATH_LIBRARY NAMES m)
+  if(ABSCOM_MATH_LIBRARY)
+    list(APPEND ABSCOM_PLATFORM_LIBS ${ABSCOM_MATH_LIBRARY})
+  endif()
+endif()
+
+# Static library - the primary target used by the tests and examples.
+add_library(abscom_static STATIC ${ABSCOM_SOURCES})
+target_include_directories(abscom_static
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_compile_definitions(abscom_static PRIVATE ABS_BUILDING_LIBRARY)
+target_link_libraries(abscom_static PUBLIC ${ABSCOM_PLATFORM_LIBS})
+set_target_properties(abscom_static PROPERTIES
+  OUTPUT_NAME abscom
+  POSITION_INDEPENDENT_CODE ON)
+
+if(ABSCOM_BUILD_SHARED)
+  add_library(abscom_shared SHARED ${ABSCOM_SOURCES})
+  target_include_directories(abscom_shared
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  target_compile_definitions(abscom_shared
+    PRIVATE ABS_BUILDING_LIBRARY
+    PUBLIC  ABS_USE_LIBRARY)
+  target_link_libraries(abscom_shared PUBLIC ${ABSCOM_PLATFORM_LIBS})
+  set_target_properties(abscom_shared PROPERTIES
+    OUTPUT_NAME abscom
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
+if(ABSCOM_BUILD_TESTS)
+  enable_testing()
+  foreach(t IN ITEMS test_dynarray test_string test_hash test_hashmap test_platform test_abs)
+    add_executable(${t} tests/${t}.c)
+    target_link_libraries(${t} PRIVATE abscom_static)
+    add_test(NAME ${t} COMMAND ${t})
+  endforeach()
+endif()
+
+if(ABSCOM_BUILD_EXAMPLES)
+  foreach(ex IN ITEMS demo py_demo data_demo v6_demo)
+    add_executable(${ex} examples/${ex}.c)
+    target_link_libraries(${ex} PRIVATE abscom_static)
+  endforeach()
+endif()
+
+set(ABSCOM_INSTALL_TARGETS abscom_static)
+if(ABSCOM_BUILD_SHARED)
+  list(APPEND ABSCOM_INSTALL_TARGETS abscom_shared)
+endif()
+
+install(TARGETS ${ABSCOM_INSTALL_TARGETS}
+  EXPORT AbscomTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(FILES ${ABSCOM_PUBLIC_HEADERS}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/abscom)
+
+install(EXPORT AbscomTargets
+  NAMESPACE abscom::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Abscom)
+
+# pkg-config file, mirroring the one the Meson build generates.
+configure_file(cmake/abscom.pc.in abscom.pc @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/abscom.pc
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)

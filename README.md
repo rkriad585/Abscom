@@ -309,7 +309,7 @@ graph TD
         rt[abs - Python-like runtime]
     end
 
-    subgraph users[""]
+    subgraph users["Consumers"]
         tests[tests/test_* - Meson test suite]
         examples[examples/* - demo programs]
     end
