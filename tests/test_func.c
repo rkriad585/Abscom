@@ -28,6 +28,28 @@ static var shout_wrapper(var s) {
     return v("SHOUT");
 }
 
+static int wrap_calls = 0;
+static int inner_calls = 0;
+
+static var inner_square(var x) {
+    inner_calls++;
+    return v(x->val.i * x->val.i);
+}
+
+/* Target-aware wrapper: pre/post logic around call_func(target, args). */
+static var timing_wrapper(var target, var args) {
+    wrap_calls++;
+    var result = call_func(target, args);
+    return v(result->val.i + 1);
+}
+
+/* Target-aware wrapper that never calls the target (short-circuits). */
+static var block_wrapper(var target, var args) {
+    (void)target;
+    (void)args;
+    return v("BLOCKED");
+}
+
 int main(void) {
     abs_init();
 
@@ -67,6 +89,41 @@ int main(void) {
     CHECK(is_none(func_meta(original))); /* plain funcs have no metadata */
     var out = call_func(decorated, v("x"));
     CHECK(out != NULL && out->type == ABS_STR && strcmp(out->val.s, "SHOUT") == 0);
+
+    /* def() = make_func plus a display name; func_name() reads it back. */
+    var named = def(inner_square, "square");
+    CHECK(named->type == ABS_FUNC);
+    CHECK(is_none(func_name(f))); /* unnamed make_func() -> None */
+    var nm = func_name(named);
+    CHECK(nm != NULL && nm->type == ABS_STR && strcmp(nm->val.s, "square") == 0);
+    CHECK(call_func(named, v(6))->val.i == 36);
+    CHECK(is_err(func_name(v(42))));
+
+    /* decorate_func(): target-aware wrapper gets (target, args) and can run
+     * logic around the original before/after calling it back. */
+    wrap_calls = 0;
+    inner_calls = 0;
+    var timed = decorate_func(named, timing_wrapper);
+    CHECK(timed->type == ABS_FUNC);
+    CHECK(func_meta(timed) == named);
+    CHECK(func_name(timed)->type == ABS_STR); /* inherits the target's name */
+    CHECK(strcmp(func_name(timed)->val.s, "square") == 0);
+    CHECK(call_func(timed, v(5))->val.i == 26); /* 5*5 then +1 */
+    CHECK(inner_calls == 1);
+    CHECK(wrap_calls == 1);
+    CHECK(call_func(timed, v(3))->val.i == 10); /* 3*3 then +1 */
+    CHECK(inner_calls == 2);
+    /* The original is still callable directly, untouched. */
+    CHECK(call_func(named, v(5))->val.i == 25);
+    CHECK(inner_calls == 3);
+    CHECK(is_err(decorate_func(v(42), timing_wrapper)));
+
+    /* A wrapper may choose not to call the target at all. */
+    var blocker = decorate_func(named, block_wrapper);
+    var blocked = call_func(blocker, v(9));
+    CHECK(blocked != NULL && blocked->type == ABS_STR &&
+          strcmp(blocked->val.s, "BLOCKED") == 0);
+    CHECK(inner_calls == 3); /* target never ran */
 
     abs_cleanup();
     return 0;

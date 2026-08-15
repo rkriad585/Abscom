@@ -95,6 +95,7 @@ static void free_internals(var obj) {
         case ABS_LIST:
         case ABS_SET:   free(obj->val.list.items); break;
         case ABS_CLASS: free(obj->val.cls.name); break;
+        case ABS_FUNC: free(obj->val.func.name); break;
         case ABS_FILE:
             if (obj->val.file_ptr) fclose(obj->val.file_ptr);
             break;
@@ -440,7 +441,12 @@ static void print_single(var obj) {
         case ABS_GENERATOR: printf("<generator>"); break;
         case ABS_SERVER: printf("<Server Port:%d>", obj->val.server.port); break;
         case ABS_LIB: printf("<library %s>", obj->val.lib.path ? obj->val.lib.path : ""); break;
-        case ABS_FUNC: printf("<function>"); break;
+        case ABS_FUNC:
+            if (obj->val.func.name && obj->val.func.name[0])
+                printf("<function %s>", obj->val.func.name);
+            else
+                printf("<function>");
+            break;
         case ABS_ITERATOR: printf("<iterator>"); break;
     }
 }
@@ -666,9 +672,16 @@ static void str_build(abs_string_t *s, var obj) {
         case ABS_LIB:
             abs_string_append_cstr(s, "<library>");
             break;
-        case ABS_FUNC:
-            abs_string_append_cstr(s, "<function>");
+        case ABS_FUNC: {
+            char fbuf[128];
+            if (obj->val.func.name && obj->val.func.name[0])
+                snprintf(fbuf, sizeof(fbuf), "<function %s>",
+                         obj->val.func.name);
+            else
+                snprintf(fbuf, sizeof(fbuf), "<function>");
+            abs_string_append_cstr(s, fbuf);
             break;
+        }
         case ABS_ITERATOR:
             abs_string_append_cstr(s, "<iterator>");
             break;

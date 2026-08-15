@@ -41,6 +41,22 @@ static var shout(var s) {
     return v("SHOUT");
 }
 
+/* Target-aware decorator: pre/post logic around call_func(target, args). */
+static var slow_square(var x) {
+    return v(x->val.i * x->val.i);
+}
+
+static var timing_wrapper(var target, var args) {
+    clock_t start = clock();
+    var result = call_func(target, args); /* run the original */
+    clock_t end = clock();
+    char buf[64];
+    snprintf(buf, sizeof(buf), "[timing] %.4f sec",
+             (double)(end - start) / CLOCKS_PER_SEC);
+    print(v("  "), v(buf));
+    return result;
+}
+
 int main(int argc, char **argv) {
     abs_init();
 
@@ -93,10 +109,18 @@ int main(int argc, char **argv) {
     print(v("  body calls after cache hit:"), v(fib_calls));
 
     /* --- 4. Decorators --- */
-    print(v("--- 4. Decorator ---"));
+    print(v("--- 4. Decorators ---"));
     var plain = make_func(on_user_login);
     var loud = decorate(plain, shout);
-    print(v("  decorated call ->"), call_func(loud, None));
+    print(v("  swap-body decorator ->"), call_func(loud, None));
+
+    /* Target-aware decorator: the wrapper receives (target, args) and calls
+     * the original through call_func() so it can time the body. */
+    var sq = def(slow_square, "square");
+    var timed = decorate_func(sq, timing_wrapper);
+    print(v("  timed square(9) ->"), call_func(timed, v(9)));
+    print(v("  decorator name:"), func_name(timed));
+    print(v("  original reachable:"), func_meta(timed) == sq ? v("yes") : v("no"));
 
     /* --- 5. Introspection --- */
     print(v("--- 5. Introspection ---"));

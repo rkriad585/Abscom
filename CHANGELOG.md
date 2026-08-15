@@ -67,5 +67,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cryptography (`abs_crypto.c`): from-scratch `sha256` and `hmac_sha256` (FIPS 180-4 / RFC 2104), returned as lowercase hex strings and pinned to known-answer test vectors.
   - Shuffling (`abs.c`): `fisher_yates` (classic name for `shuffle`) and `riffle_shuffle`, which cuts a list in half and randomly interleaves the two piles.
   - Itertools (`abs_itertools.c`): `repeat(val, n)` iterator alongside `chain`/`cycle`, all driven by `iter_next`.
+- Decorator layer:
+  - Named function objects (`abs_func.c`): `def(f, name)` adds a display name to `make_func`; `func_name` reads it back, and `print`/`str` render it as `<function name>`.
+  - Target-aware decorators (`abs_func.c`): `decorate_func(target, wrapper)` builds a wrapper that receives `(target, args)` and calls back into `call_func(target, args)`, so pre/post logic can run around the original (Python `@decorator` style). `call_func` dispatches plain, memoized, and decorated functions transparently; the original stays reachable via `func_meta`/`func_name`.
+  - The WebSocket API (handshake and framing) from the 13.0-style announcement was already delivered by the realtime and crypto layer.
 - Build system: Meson project with static + shared libraries, twenty-six tests, and nine example programs.
 - Documentation: README, `docs/` (including the language-features, framework, algorithm-suite, and realtime-and-crypto pages), logo, and standard project files.

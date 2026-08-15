@@ -94,7 +94,7 @@ Abscom bundles low-level building blocks — dynamic arrays, growable strings, h
 - **Web server** — `Server` / `route` / `server_run` micro HTTP server plus a socket-free `server_handle` dispatcher for testing.
 - **Events** — `EventBus` / `on` / `emit` publish-subscribe with per-event handler lists.
 - **Plugins** — `load_library` / `call_lib_func` dynamic library loading (`LoadLibrary` / `dlopen`).
-- **Function objects** — `make_func`, `call_func`, `memoize` / `call_memoized` caching, and `decorate` / `func_meta` decorators.
+- **Function objects** — `make_func` and named `def(f, name)`, `call_func` dispatch, `memoize` / `call_memoized` caching, `decorate` body-swapping, and target-aware `decorate_func(target, wrapper)` decorators that wrap pre/post logic around the original (Python `@decorator` style) with `func_meta` / `func_name` introspection.
 - **Introspection** — `id`, `repr`, and `dir` for object identity, debugging, and key listing.
 - **Itertools** — lazy `chain` and `cycle` iterators with `iter_next`.
 - **Sorting suite** — twelve algorithms from `O(n²)` (bubble, selection, insertion) to `O(n log n)` (shell, heap, merge, quick, C `qsort`) and `O(n)` integer sorts (counting, radix, bucket), plus the joke `sort_bogo`.
@@ -312,6 +312,15 @@ emit(bus, "login", v("Alice"));
 var f = memoize(heavy_calc);             /* cached calls */
 print(call_memoized(f, v(5)));
 
+static var timing(var target, var args) {     /* @decorator in C */
+    var r = call_func(target, args);          /* run the original */
+    return r;
+}
+var sq = def(slow_square, "square");          /* named function */
+var timed = decorate_func(sq, timing);        /* wrap it */
+print(call_func(timed, v(4)));                /* 16 */
+print(func_name(timed));                      /* square */
+
 var c = chain(List(), List());           /* itertools */
 print(iter_next(c));                     /* None once exhausted */
 ```
@@ -433,7 +442,7 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | [web-server.md](docs/web-server.md) | `Server`, `route`, `server_handle`, and `server_run`. |
 | [events.md](docs/events.md) | `EventBus`, `on`, and `emit`. |
 | [plugins.md](docs/plugins.md) | `load_library` and `call_lib_func`. |
-| [functions.md](docs/functions.md) | `make_func`, `call_func`, `memoize`, `decorate`, and `func_meta`. |
+| [functions.md](docs/functions.md) | `make_func`, `def`, `call_func`, `memoize`, `decorate`/`decorate_func`, `func_meta`, `func_name`. |
 | [introspection.md](docs/introspection.md) | `id`, `repr`, and `dir`. |
 | [itertools.md](docs/itertools.md) | `chain`, `cycle`, and `iter_next`. |
 

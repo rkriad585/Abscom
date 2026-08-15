@@ -45,6 +45,10 @@ typedef AbsObj *var;
 typedef var (*AbsThreadFunc)(var);
 typedef var (*AbsGenFunc)(var);
 typedef var (*AbsFunc)(var); /* standard signature: var -> var */
+/* Decorator wrapper: receives the original target function plus the call
+ * argument, so it can run pre/post logic around the target (Python-style
+ * @decorator wrapping). Call the target with call_func(target, args). */
+typedef var (*AbsWrapperFunc)(var target, var args);
 
 /* Opaque handle to a shared library: HMODULE on Windows, void* on POSIX. */
 typedef void *LibHandle;
@@ -113,9 +117,11 @@ typedef struct AbsObj {
             char *path;
         } lib;
         struct {
-            AbsFunc func_ptr;
-            AbsObj *cache;    /* ABS_DICT used by memoize(); NULL otherwise */
-            AbsObj *metadata; /* original function kept by decorate() */
+            AbsFunc func_ptr;        /* body for plain wrapped functions */
+            AbsWrapperFunc wrap_ptr; /* target-aware decorator body (decorate_func) */
+            char *name;              /* optional display name (def) */
+            AbsObj *cache;           /* ABS_DICT used by memoize(); NULL otherwise */
+            AbsObj *metadata;        /* original function kept by decorate() */
         } func;
         struct {
             AbsObj *source_a;
@@ -399,10 +405,16 @@ ABS_API var call_lib_func(var lib, const char *func_name, var arg);
 
 /* 4. Function objects, decorators and memoization. */
 ABS_API var make_func(AbsFunc f);
+ABS_API var def(AbsFunc f, const char *name); /* make_func + display name */
 ABS_API var call_func(var func_obj, var arg);
 ABS_API var call_memoized(var func_obj, var arg);
 ABS_API var decorate(var func_obj, AbsFunc wrapper_logic);
+/* Target-aware decorator: the wrapper receives (target, args) and calls back
+ * into call_func(target, args) to run the original; the original stays
+ * reachable via func_meta(). */
+ABS_API var decorate_func(var target, AbsWrapperFunc wrapper);
 ABS_API var func_meta(var func_obj);
+ABS_API var func_name(var func_obj);
 ABS_API var memoize(AbsFunc f);
 
 /* 5. Introspection. */
