@@ -4,9 +4,10 @@ FROM debian:bookworm-slim AS build
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        gcc \
+        build-essential \
         meson \
         ninja-build \
+        pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
