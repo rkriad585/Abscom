@@ -73,6 +73,8 @@ nav:
       - File Handles: runtime-files.md
       - System and Processes: system.md
       - Error Handling: error-handling.md
+  - Scientific:
+      - Matrices, Statistics, and More: scientific.md
   - Architecture: architecture.md
   - Configuration: configuration.md
   - Development: development.md

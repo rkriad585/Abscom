@@ -22,6 +22,11 @@ set(ABSCOM_SOURCES
   src/abs_hashmap.c
   src/abs_time.c
   src/abs_fs.c
+  src/abs_matrix.c
+  src/abs_stats.c
+  src/abs_csv.c
+  src/abs_path.c
+  src/abs_thread.c
   src/abs.c
 )
 
@@ -36,7 +41,7 @@ set(ABSCOM_PUBLIC_HEADERS
   include/abscom/abs_fs.h
 )
 
-# Platform libraries: ws2_32 for sockets on Windows, libm elsewhere.
+# Platform libraries: ws2_32 for sockets on Windows, libm and pthread elsewhere.
 set(ABSCOM_PLATFORM_LIBS "")
 if(WIN32)
   list(APPEND ABSCOM_PLATFORM_LIBS ws2_32)
@@ -44,6 +49,10 @@ else()
   find_library(ABSCOM_MATH_LIBRARY NAMES m)
   if(ABSCOM_MATH_LIBRARY)
     list(APPEND ABSCOM_PLATFORM_LIBS ${ABSCOM_MATH_LIBRARY})
+  endif()
+  find_package(Threads)
+  if(Threads_FOUND)
+    list(APPEND ABSCOM_PLATFORM_LIBS Threads::Threads)
   endif()
 endif()
 
@@ -78,7 +87,8 @@ endif()
 
 if(ABSCOM_BUILD_TESTS)
   enable_testing()
-  foreach(t IN ITEMS test_dynarray test_string test_hash test_hashmap test_platform test_abs)
+  foreach(t IN ITEMS test_dynarray test_string test_hash test_hashmap test_platform test_abs
+                   test_matrix test_stats test_csv test_path test_thread)
     add_executable(${t} tests/${t}.c)
     target_link_libraries(${t} PRIVATE abscom_static)
     add_test(NAME ${t} COMMAND ${t})
@@ -86,7 +96,7 @@ if(ABSCOM_BUILD_TESTS)
 endif()
 
 if(ABSCOM_BUILD_EXAMPLES)
-  foreach(ex IN ITEMS demo py_demo data_demo v6_demo)
+  foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo)
     add_executable(${ex} examples/${ex}.c)
     target_link_libraries(${ex} PRIVATE abscom_static)
   endforeach()

@@ -17,6 +17,7 @@
 #include <windows.h>
 #else
 #include <unistd.h>
+#include <pthread.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -34,16 +35,31 @@ static MemBlock *pool_head = NULL;
 static size_t pool_index = 0;
 static var gc_dynamic_head = NULL;
 
+#ifdef _WIN32
+static CRITICAL_SECTION gc_lock;
+#define GC_LOCK()   EnterCriticalSection(&gc_lock)
+#define GC_UNLOCK() LeaveCriticalSection(&gc_lock)
+#else
+static pthread_mutex_t gc_lock = PTHREAD_MUTEX_INITIALIZER;
+#define GC_LOCK()   pthread_mutex_lock(&gc_lock)
+#define GC_UNLOCK() pthread_mutex_unlock(&gc_lock)
+#endif
+
 static var pool_alloc(void) {
+    GC_LOCK();
     if (!pool_head || pool_index >= POOL_BLOCK_SIZE) {
         MemBlock *new_block = (MemBlock *)malloc(sizeof(MemBlock));
-        if (!new_block) return NULL;
+        if (!new_block) {
+            GC_UNLOCK();
+            return NULL;
+        }
         new_block->next = pool_head;
         pool_head = new_block;
         pool_index = 0;
     }
     var obj = &pool_head->objects[pool_index++];
     memset(obj, 0, sizeof(AbsObj));
+    GC_UNLOCK();
     return obj;
 }
 
@@ -56,8 +72,10 @@ static char *abs_dup_str(const char *s) {
 }
 
 static void track_dynamic(var obj) {
+    GC_LOCK();
     obj->next = gc_dynamic_head;
     gc_dynamic_head = obj;
+    GC_UNLOCK();
 }
 
 static int is_num(var o) {
@@ -93,12 +111,26 @@ static void free_internals(var obj) {
                 free(obj->val.dict.buckets);
             }
             break;
+        case ABS_MATRIX:
+            free(obj->val.matrix.data);
+            break;
+        case ABS_THREAD:
+#ifdef _WIN32
+            if (obj->val.thread.handle)
+                CloseHandle((HANDLE)obj->val.thread.handle);
+#else
+            free(obj->val.thread.handle);
+#endif
+            break;
         default:
             break;
     }
 }
 
 void abs_init(void) {
+#ifdef _WIN32
+    InitializeCriticalSection(&gc_lock);
+#endif
     srand((unsigned int)time(NULL));
     if (pool_head) {
         MemBlock *b = pool_head;
@@ -137,6 +169,9 @@ void abs_cleanup(void) {
     pool_index = 0;
 #ifdef _WIN32
     WSACleanup();
+#endif
+#ifdef _WIN32
+    DeleteCriticalSection(&gc_lock);
 #endif
 }
 
@@ -248,6 +283,25 @@ var abs_new_error(const char *msg) {
     return obj;
 }
 
+var abs_new_obj(AbsType type) {
+    var obj = pool_alloc();
+    if (!obj) return NULL;
+    obj->type = type;
+    return obj;
+}
+
+void abs_gc_track(var obj) {
+    if (!obj) return;
+    track_dynamic(obj);
+}
+
+double abs_num_val(var obj) {
+    if (!obj) return 0.0;
+    if (obj->type == ABS_FLOAT) return obj->val.f;
+    if (obj->type == ABS_INT) return (double)obj->val.i;
+    return 0.0;
+}
+
 static unsigned long dict_hash(const char *s) {
     unsigned long h = 5381;
     int c;
@@ -341,6 +395,23 @@ static void print_single(var obj) {
             break;
         case ABS_FILE:  printf("<file>"); break;
         case ABS_ERROR: printf("Error: %s", obj->val.error_msg); break;
+        case ABS_MATRIX: {
+            int rows = obj->val.matrix.rows;
+            int cols = obj->val.matrix.cols;
+            printf("Matrix(%dx%d): [", rows, cols);
+            for (int i = 0; i < rows; i++) {
+                if (i > 0) printf(", ");
+                printf("[");
+                for (int j = 0; j < cols; j++) {
+                    if (j > 0) printf(", ");
+                    printf("%.2f", obj->val.matrix.data[i * cols + j]);
+                }
+                printf("]");
+            }
+            printf("]");
+            break;
+        }
+        case ABS_THREAD: printf("<thread>"); break;
     }
 }
 
@@ -526,6 +597,29 @@ static void str_build(abs_string_t *s, var obj) {
             break;
         case ABS_ERROR:
             abs_string_append_cstr(s, obj->val.error_msg);
+            break;
+        case ABS_MATRIX: {
+            char num_buf[32];
+            abs_string_append_cstr(s, "Matrix(");
+            snprintf(num_buf, sizeof(num_buf), "%dx%d): [",
+                     obj->val.matrix.rows, obj->val.matrix.cols);
+            abs_string_append_cstr(s, num_buf);
+            for (int i = 0; i < obj->val.matrix.rows; i++) {
+                if (i > 0) abs_string_append_cstr(s, ", ");
+                abs_string_append_cstr(s, "[");
+                for (int j = 0; j < obj->val.matrix.cols; j++) {
+                    if (j > 0) abs_string_append_cstr(s, ", ");
+                    snprintf(num_buf, sizeof(num_buf), "%.2f",
+                             obj->val.matrix.data[i * obj->val.matrix.cols + j]);
+                    abs_string_append_cstr(s, num_buf);
+                }
+                abs_string_append_cstr(s, "]");
+            }
+            abs_string_append_cstr(s, "]");
+            break;
+        }
+        case ABS_THREAD:
+            abs_string_append_cstr(s, "<thread>");
             break;
     }
 }
@@ -1047,6 +1141,8 @@ var type(var obj) {
         case ABS_ERROR: return abs_new_str("<class 'error'>");
         case ABS_CLASS: return abs_new_str("<class 'class'>");
         case ABS_INSTANCE: return abs_new_str("<class 'instance'>");
+        case ABS_MATRIX:  return abs_new_str("<class 'matrix'>");
+        case ABS_THREAD:  return abs_new_str("<class 'thread'>");
         default:        return abs_new_str("<class 'NoneType'>");
     }
 }

@@ -26,10 +26,14 @@ typedef enum {
     ABS_NONE,
     ABS_SET,
     ABS_CLASS,
-    ABS_INSTANCE
+    ABS_INSTANCE,
+    ABS_MATRIX,
+    ABS_THREAD
 } AbsType;
 
 typedef struct AbsObj AbsObj;
+typedef AbsObj *var;
+typedef var (*AbsThreadFunc)(var);
 
 typedef struct DictNode {
     char *key;
@@ -62,6 +66,17 @@ typedef struct AbsObj {
             AbsObj *cls_ptr;
             AbsObj *attr_dict;
         } inst;
+        struct {
+            int rows;
+            int cols;
+            double *data;
+        } matrix;
+        struct {
+            void *handle; /* Windows HANDLE or malloc'd pthread_t * on POSIX */
+            AbsThreadFunc func;
+            AbsObj *arg;
+            AbsObj *result;
+        } thread;
         FILE *file_ptr;
         char *error_msg;
     } val;
@@ -86,6 +101,11 @@ ABS_API var abs_new_list(void);
 ABS_API var abs_new_dict(void);
 ABS_API var abs_new_set(void);
 ABS_API var abs_new_error(const char *msg);
+
+/* Low-level object helpers used by the runtime and the scientific modules. */
+ABS_API var abs_new_obj(AbsType type);
+ABS_API void abs_gc_track(var obj);
+ABS_API double abs_num_val(var obj);
 
 #define v(X) _Generic((X),                                             \
     int: abs_new_int,                                                  \
@@ -220,6 +240,47 @@ ABS_API long get_len_fast(var obj);
          _i_##VAR++)
 
 #define str(o) to_str(o)
+
+/* --- Scientific layer: matrices, statistics, math, CSV, paths, threads --- */
+
+ABS_API var abs_matrix_new(int rows, int cols);
+ABS_API var abs_matrix_eye(int n);
+ABS_API int abs_matrix_rows(var m);
+ABS_API int abs_matrix_cols(var m);
+ABS_API void abs_matrix_set(var m, int r, int c, double val);
+ABS_API double abs_matrix_get(var m, int r, int c);
+ABS_API var abs_matrix_mul(var A, var B);
+ABS_API var abs_matrix_transpose(var m);
+ABS_API var abs_matrix_det(var m);
+ABS_API void abs_matrix_print(var m);
+
+ABS_API var abs_stats_mean(var list);
+ABS_API var abs_stats_median(var list);
+ABS_API var abs_stats_mode(var list);
+ABS_API var abs_stats_variance(var list);
+ABS_API var abs_stats_stdev(var list);
+
+ABS_API var sin_val(var x);
+ABS_API var cos_val(var x);
+ABS_API var tan_val(var x);
+ABS_API var log_val(var x);
+ABS_API var log10_val(var x);
+ABS_API var sqrt_val(var x);
+ABS_API var deg2rad(var x);
+
+ABS_API var factorial(var n);
+ABS_API var nCr(var n, var r);
+ABS_API var nPr(var n, var r);
+
+ABS_API var path_join(var p1, var p2);
+ABS_API var path_exists(var path);
+ABS_API var getcwd_val(void);
+
+ABS_API var csv_read(const char *filename);
+ABS_API void csv_write(const char *filename, var list_of_lists);
+
+ABS_API var thread_start(AbsThreadFunc func, var arg);
+ABS_API var thread_join(var thread_obj);
 
 ABS_END_C_DECLS
 

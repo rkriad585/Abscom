@@ -34,5 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Sets: `set_add`, `set_contains`, `set_union`, `set_diff`.
   - OOP-lite: `Class`/`New`/`set_attr`/`get_attr`.
   - System helpers: `sleep_sec`, `time_now`, `exec_cmd`, and HTTP/1.0 `http_get`.
-- Build system: Meson project with static + shared libraries, six tests, and four example programs.
+- Scientific layer:
+  - Matrices (`abs_matrix_*`): zero/identity constructors, get/set, multiplication, transpose, determinant (Laplace expansion), and printing.
+  - Statistics (`abs_stats_*`): `mean`, `median`, `mode`, population `variance`, and population `stdev`.
+  - Advanced math: `sin_val`, `cos_val`, `tan_val`, `log_val`, `log10_val`, `sqrt_val`, `deg2rad`.
+  - Combinatorics: `factorial`, `nCr`, `nPr`.
+  - Paths and OS helpers: `path_join`, `path_exists`, `getcwd_val`.
+  - CSV: `csv_read` and `csv_write`.
+  - Threading: `thread_start`/`thread_join` with a new `ABS_THREAD` type and lock-guarded memory pool for thread-safe allocation.
+- Build system: Meson project with static + shared libraries, eleven tests, and five example programs.
 - Documentation: README, `docs/`, logo, and standard project files.

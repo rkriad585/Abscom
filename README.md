@@ -21,7 +21,7 @@
 
 ## Overview
 
-Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
+Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C, plus a scientific layer with matrices, statistics, advanced math, CSV, path helpers, and basic threading. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
 
 ## Screenshots
 
@@ -79,6 +79,13 @@ Abscom bundles low-level building blocks — dynamic arrays, growable strings, h
 - **Sequences** — `sorted` (ascending/descending), `reversed_seq`, `zip_lists`, `slice`, and `range`/`range_step`.
 - **OOP-lite** — `Class` / `New` / `set_attr` / `get_attr` for lightweight class-and-instance objects.
 - **System helpers** — `sleep_sec`, `time_now`, `exec_cmd`, and an HTTP/1.0 `http_get`.
+- **Matrices** — `abs_matrix_*` constructors, get/set, multiplication, transpose, determinant, and printing.
+- **Statistics** — `mean`, `median`, `mode`, population `variance`, and population `stdev`.
+- **Advanced math** — `sin_val`, `cos_val`, `tan_val`, `log_val`, `log10_val`, `sqrt_val`, `deg2rad`.
+- **Combinatorics** — `factorial`, `nCr`, `nPr`.
+- **Paths & OS helpers** — `path_join`, `path_exists`, `getcwd_val`.
+- **CSV** — `csv_read` and `csv_write`.
+- **Threading** — `thread_start` / `thread_join` with a lock-guarded object pool for safe allocation from worker threads.
 - **One umbrella header** — `abscom/abs.h` exposes the core modules and the dynamic runtime.
 
 ## Installation
@@ -235,7 +242,22 @@ if (is_err(html)) {
 }
 ```
 
-More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`) and are built as `build/examples/<name>`.
+### Matrices and statistics
+
+```c
+var A = abs_matrix_new(2, 2);
+abs_matrix_set(A, 0, 0, 1.0); abs_matrix_set(A, 0, 1, 2.0);
+abs_matrix_set(A, 1, 0, 3.0); abs_matrix_set(A, 1, 1, 4.0);
+print(v("det(A):"), abs_matrix_det(A));   /* -2.00 */
+
+var data = List();
+append(data, v(10)); append(data, v(20));
+append(data, v(20)); append(data, v(40));
+print(v("mean:"), abs_stats_mean(data));  /* 22.50 */
+print(v("stdev:"), abs_stats_stdev(data));/* 10.90 */
+```
+
+More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`, `sci_demo.c`) and are built as `build/examples/<name>`.
 
 ## Documentation
 
@@ -287,6 +309,12 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | [system.md](docs/system.md) | `sleep_sec`, `time_now`, `exec_cmd`, `http_get`. |
 | [error-handling.md](docs/error-handling.md) | `abs_new_error`, `is_err`, and failure behavior. |
 
+### Scientific layer
+
+| Document | Description |
+| --- | --- |
+| [scientific.md](docs/scientific.md) | Matrices, statistics, advanced math, combinatorics, paths, CSV, and threading. |
+
 ## Interface
 
 - **Core library** — include `<abscom/abs.h>` to get `abs_dynarray`, `abs_string`, `abs_hash`, `abs_hashmap`, `abs_time`, and `abs_fs` in one header.
@@ -307,6 +335,7 @@ graph TD
         time[abs_time - monotonic / wall clock]
         fs[abs_fs - file I/O]
         rt[abs - Python-like runtime]
+        sci[abs_* - matrices, stats, math, CSV, paths, threads]
     end
 
     subgraph users["Consumers"]
@@ -321,6 +350,7 @@ graph TD
     time --> common
     fs --> common
     rt --> str
+    sci --> rt
     tests --> core
     examples --> core
 ```
@@ -332,6 +362,7 @@ See [docs/architecture.md](docs/architecture.md) for the full layout.
 - A C11 compiler (GCC, Clang, or MSVC-compatible).
 - Meson (tested with 1.x) and Ninja for building from source.
 - Windows builds link `ws2_32`; POSIX builds use the standard socket and `clock_gettime` interfaces.
+- POSIX builds also link `m` and `pthread` for the scientific layer's math and threading.
 - No third-party C library dependencies.
 
 ## Prerequisites
@@ -362,6 +393,7 @@ Run the example programs:
 ./build/examples/py_demo
 ./build/examples/data_demo
 ./build/examples/v6_demo
+./build/examples/sci_demo
 ```
 
 See [docs/development.md](docs/development.md) for details.

@@ -35,19 +35,25 @@ SRCS := \
 	src/abs_hashmap.c \
 	src/abs_time.c \
 	src/abs_fs.c \
+	src/abs_matrix.c \
+	src/abs_stats.c \
+	src/abs_csv.c \
+	src/abs_path.c \
+	src/abs_thread.c \
 	src/abs.c
 OBJS := $(patsubst src/%.c,$(OBJDIR)/%.o,$(SRCS))
 
-TESTS    := test_dynarray test_string test_hash test_hashmap test_platform test_abs
-EXAMPLES := demo py_demo data_demo v6_demo
+TESTS    := test_dynarray test_string test_hash test_hashmap test_platform test_abs \
+            test_matrix test_stats test_csv test_path test_thread
+EXAMPLES := demo py_demo data_demo v6_demo sci_demo
 
-# Windows (MinGW/MSYS) links ws2_32; POSIX links libm and gets .so/.dylib.
+# Windows (MinGW/MSYS) links ws2_32; POSIX links libm and pthreads.
 ifeq ($(OS),Windows_NT)
   PLATFORM_LIBS := -lws2_32
   SHLIB := $(BUILDDIR)/abscom.dll
   EXEEXT := .exe
 else
-  PLATFORM_LIBS := -lm
+  PLATFORM_LIBS := -lm -lpthread
   UNAME_S := $(shell uname -s)
   ifeq ($(UNAME_S),Darwin)
     SHLIB := $(BUILDDIR)/libabscom.dylib
