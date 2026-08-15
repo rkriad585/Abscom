@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(abscom
-  VERSION 0.1.0
+  VERSION 0.2.6
   DESCRIPTION "A C11 library of reusable data structures and a Python-inspired dynamic runtime"
   LANGUAGES C)
 
@@ -24,6 +24,12 @@ set(ABSCOM_SOURCES
   src/abs_fs.c
   src/abs_matrix.c
   src/abs_stats.c
+  src/abs_complex.c
+  src/abs_ml.c
+  src/abs_scalar.c
+  src/abs_img.c
+  src/abs_plot.c
+  src/abs_df.c
   src/abs_csv.c
   src/abs_path.c
   src/abs_thread.c
@@ -42,6 +48,7 @@ set(ABSCOM_SOURCES
   src/abs_sort.c
   src/abs_crypto.c
   src/abs_ws.c
+  src/abs_geom.c
   src/abs.c
 )
 
@@ -107,10 +114,10 @@ endif()
 if(ABSCOM_BUILD_TESTS)
   enable_testing()
   foreach(t IN ITEMS test_dynarray test_string test_hash test_hashmap test_platform test_abs
-                   test_matrix test_stats test_csv test_path test_thread
+                   test_matrix test_ml test_stats test_math test_csv test_path test_thread
                    test_regex test_except test_datetime test_gen test_encode test_env
                    test_server test_events test_plugins test_func test_introspect test_itertools
-                   test_sort test_crypto test_ws)
+                   test_sort test_crypto test_ws test_ultra test_geom test_macros)
     add_executable(${t} tests/${t}.c)
     target_link_libraries(${t} PRIVATE abscom_static)
     add_test(NAME ${t} COMMAND ${t})
@@ -118,7 +125,7 @@ if(ABSCOM_BUILD_TESTS)
 endif()
 
 if(ABSCOM_BUILD_EXAMPLES)
-  foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo crypto_demo)
+  foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo crypto_demo ml_demo ml_train_demo math_demo ds_demo ultra_demo geom_demo demo_macros)
     add_executable(${ex} examples/${ex}.c)
     target_link_libraries(${ex} PRIVATE abscom_static)
   endforeach()

@@ -78,7 +78,7 @@ Run a single test with `meson test -C build test_abs`.
 
 ## Versioning
 
-- The canonical version lives in `meson.build` (`version: '0.1.0'`).
+- The canonical version lives in `meson.build` (`version: '0.2.6'`).
 - The `.version` file at the repository root must stay synchronized with it.
 - `installer.sh` and `installer.ps1` each declare a `VERSION` used to construct the prebuilt-asset download URL; keep those in sync too.
 - `CHANGELOG.md` documents user-visible changes per release.
@@ -91,7 +91,7 @@ Run a single test with `meson test -C build test_abs`.
 4. Verify the example programs run.
 5. Verify an installer install/uninstall cycle (see [installation.md](installation.md)).
 6. Regenerate screenshots if the examples changed (`python tools/generate_screenshots.py`).
-7. Tag the release (`git tag v0.1.0` and `git push --tags`).
+7. Tag the release (`git tag v0.2.6` and `git push --tags`).
 
 Tagging `v<version>` on `main` triggers the release pipeline (`.github/workflows/release.yml`), which:
 

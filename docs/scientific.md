@@ -16,11 +16,25 @@ A `var` matrix stores its values in a single flat `double` array, laid out row-m
 | --- | --- |
 | `var abs_matrix_new(int rows, int cols)` | Zero-initialized `rows x cols` matrix. |
 | `var abs_matrix_eye(int n)` | `n x n` identity matrix. |
+| `var abs_matrix_random(int rows, int cols)` | Uniformly random entries in `[-1, 1]` (weight init). |
 | `int abs_matrix_rows(var m)` | Row count (0 for non-matrices). |
 | `int abs_matrix_cols(var m)` | Column count (0 for non-matrices). |
 | `void abs_matrix_set(var m, int r, int c, double val)` | Set element `(r, c)` (bounds-checked). |
 | `double abs_matrix_get(var m, int r, int c)` | Get element `(r, c)` (0.0 on error). |
 | `var abs_matrix_mul(var A, var B)` | Matrix product; `ABS_ERROR` on dimension mismatch. |
+| `var abs_matrix_add(var A, var B)` | Element-wise sum; `ABS_ERROR` on dimension mismatch. |
+| `var abs_matrix_sub(var A, var B)` | Element-wise difference; `ABS_ERROR` on dimension mismatch. |
+| `var abs_matrix_mul_element(var A, var B)` | Hadamard (element-wise) product; `ABS_ERROR` on dimension mismatch. |
+| `var abs_matrix_scale(var m, double s)` | Multiply every element by `s` (returns a new matrix). |
+| `var abs_matrix_add_scalar(var m, double s)` | Add `s` to every element (returns a new matrix). |
+| `void abs_matrix_apply(var m, double (*func)(double))` | Apply `func` to every element in place. |
+| `var abs_matrix_copy(var m)` | Deep copy of a matrix. |
+| `void abs_matrix_add_row_vector(var m, var v)` | Broadcasting: add a `1 x cols` row vector to every row (bias terms). |
+| `var abs_matrix_sum(var m)` | Sum of all elements (float). |
+| `var abs_matrix_mean(var m)` | Arithmetic mean (float). |
+| `var abs_matrix_min(var m)` | Smallest element (float). |
+| `var abs_matrix_max(var m)` | Largest element (float). |
+| `long abs_matrix_argmax(var m)` | Flat index of the largest element; `-1` for non-matrices. |
 | `var abs_matrix_transpose(var m)` | Transposed copy. |
 | `var abs_matrix_det(var m)` | Determinant of a square matrix (Laplace expansion, any size). |
 | `void abs_matrix_print(var m)` | Pretty-print a matrix. |
@@ -156,3 +170,13 @@ print(v("Result:"), result);   /* 120 */
 ```
 
 Back to [README](https://github.com/rkriad585/Abscom/blob/main/README.md).
+
+For activations, softmax, loss, and numerical gradients on matrices, see [AI/ML Layer](ml.md).
+
+For scalar math helpers, number theory, geometry, root finding, complex numbers, and raw-array statistics, see [General Mathematics](general-math.md).
+
+For NumPy-style reshaping, generators, CSV, functional utils, and train/test splitting, see [Data Science Layer](data-science.md).
+
+For computational backends (AVX/GPU), scalar autograd, PPM vision and convolution, plotting, and dataframes, see [Ultimate Layer](ultimate.md).
+
+For modern type aliases, 2D/3D/4D vectors, matrices, and quaternions, see [Spatial Math](spatial-math.md).

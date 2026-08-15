@@ -1,13 +1,16 @@
 site_name: Abscom
 site_description: A C11 library of reusable data structures and a Python-inspired dynamic runtime
+site_author: rkriad585
 site_url: https://rkriad585.github.io/Abscom/
 repo_url: https://github.com/rkriad585/Abscom
 repo_name: rkriad585/Abscom
 edit_uri: blob/main/docs/
-copyright: Copyright &copy; 2026 rkriad585. Released under the MIT License.
+copyright: Copyright &copy; 2026 <a href="https://rkriad585.github.io">rkriad585</a>. Released under the MIT License.
 
 theme:
   name: material
+  logo: https://raw.githubusercontent.com/rkriad585/Abscom/main/logo/logo.svg
+  favicon: https://raw.githubusercontent.com/rkriad585/Abscom/main/logo/logo.svg
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
@@ -47,6 +50,7 @@ nav:
   - Installation: installation.md
   - Core Library:
       - Common Macros: common-macros.md
+      - Macro Utilities: macros.md
       - Dynamic Arrays: dynamic-arrays.md
       - Strings: strings.md
       - Hashing: hashing.md
@@ -81,6 +85,11 @@ nav:
       - Encoding and Environment: encoding-and-env.md
   - Scientific:
       - Matrices, Statistics, and More: scientific.md
+      - AI/ML Layer: ml.md
+      - General Mathematics: general-math.md
+      - Data Science Layer: data-science.md
+      - Ultimate Layer: ultimate.md
+      - Spatial Math: spatial-math.md
   - Framework:
       - Web Server: web-server.md
       - Events: events.md

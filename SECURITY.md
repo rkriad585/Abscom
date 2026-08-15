@@ -7,7 +7,7 @@ Abscom is pre-1.0. Security fixes are applied to the latest `main` branch. Once 
 | Version | Supported |
 | --- | --- |
 | `main` | Yes |
-| < 0.1.0 (unreleased) | Yes |
+| < 0.2.6 (unreleased) | Yes |
 
 ## Reporting a Vulnerability
 

@@ -21,7 +21,7 @@ set -eu
 OWNER="rkriad585"
 REPO="Abscom"
 BRANCH="main"
-VERSION="0.1.0"
+VERSION="0.2.6"
 
 PREFIX=""
 BUILDTYPE="release"

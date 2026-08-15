@@ -21,7 +21,7 @@
 
 ## Overview
 
-Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C, plus a scientific layer with matrices, statistics, advanced math, CSV, path helpers, and basic threading. A language-features layer adds exceptions (`try`/`catch`), context managers (`with`), regex, date/time, generators, base64/UUID, and environment variables. A framework layer tops it off with a micro web server, an event emitter, dynamic plugins, function objects with memoization and decorators, introspection, and itertools-style iterators. An algorithm suite rounds it out with twelve sorting algorithms, a swap-hook visualizer, `timeit` benchmarking, and binary search. A realtime-and-crypto layer adds RFC 6455 WebSockets (handshake and framing) plus from-scratch SHA-256 and HMAC-SHA-256. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
+Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C, plus a scientific layer with matrices, statistics, general math (scalar utilities, number theory, geometry, complex numbers), CSV, path helpers, and basic threading. A data science layer adds NumPy-style reshaping and generators, Pandas-style numeric CSV, functional utils, and SciKit-Learn-style preprocessing (one-hot encoding, train/test split). An AI/ML layer adds activations, softmax, MSE loss, and numerical gradients for neural-network forward passes. An ultimate layer tops the scientific stack off with computational backend selection (CPU / AVX SIMD / GPU stub), a Micrograd-style scalar autograd engine, PPM image loading, saving, and convolution, ASCII and SVG plotting, and a mixed-type DataFrame. A spatial math layer adds modern type aliases (Rust/NumPy style), anonymous-union 2D/3D/4D vectors, fixed-size matrices, and quaternions. A macro-utilities suite adds min/max/clamp, interpolation and smoothstep curves, generic swap, array/struct introspection, bitwise and alignment helpers, and AI activation macros. A language-features layer adds exceptions (`try`/`catch`), context managers (`with`), regex, date/time, generators, base64/UUID, and environment variables. A framework layer tops it off with a micro web server, an event emitter, dynamic plugins, function objects with memoization and decorators, introspection, and itertools-style iterators. An algorithm suite rounds it out with twelve sorting algorithms, a swap-hook visualizer, `timeit` benchmarking, and binary search. A realtime-and-crypto layer adds RFC 6455 WebSockets (handshake and framing) plus from-scratch SHA-256 and HMAC-SHA-256. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
 
 ## Screenshots
 
@@ -79,10 +79,16 @@ Abscom bundles low-level building blocks — dynamic arrays, growable strings, h
 - **Sequences** — `sorted` (ascending/descending), `reversed_seq`, `zip_lists`, `slice`, and `range`/`range_step`.
 - **OOP-lite** — `Class` / `New` / `set_attr` / `get_attr` for lightweight class-and-instance objects.
 - **System helpers** — `sleep_sec`, `time_now`, `exec_cmd`, and an HTTP/1.0 `http_get`.
-- **Matrices** — `abs_matrix_*` constructors, get/set, multiplication, transpose, determinant, and printing.
+- **Matrices** — `abs_matrix_*` constructors, get/set, add/sub/scale, Hadamard (`mul_element`), deep `copy`, scalar add, broadcasting (`add_row_vector`), element-wise `apply`, multiplication, transpose, determinant, sum/mean/min/max reductions, `argmax`, and printing.
 - **Statistics** — `mean`, `median`, `mode`, population `variance`, and population `stdev`.
-- **Advanced math** — `sin_val`, `cos_val`, `tan_val`, `log_val`, `log10_val`, `sqrt_val`, `deg2rad`.
-- **Combinatorics** — `factorial`, `nCr`, `nPr`.
+- **Advanced math** — `sin_val`, `cos_val`, `tan_val`, `log_val`, `log10_val`, `sqrt_val`, `deg2rad`, and the `ABS_PI` / `ABS_E` / `ABS_SQRT2` / `ABS_PHI` constants.
+- **General math** — scalar utilities (`abs_sq`, `abs_cb`, `abs_clamp`, `abs_lerp`, `abs_eq`), number theory (`abs_gcd`, `abs_lcm`, `abs_factorial`, `abs_is_prime`, `abs_fibonacci`), geometry (`abs_rad2deg`, `abs_hypot`, `abs_dist_euclidean`, `abs_dist_manhattan`), a Newton-Raphson `abs_root_find`, raw-array statistics (`abs_stat_mean` / `median` / `variance` / `stddev`), and complex numbers (`abs_c_add` / `sub` / `mul`, `abs_c_mag`, `abs_c_conj`, `abs_c_print`).
+- **Data science** — NumPy-style shapes (`abs_matrix_reshape` / `flatten` / `slice` / `vstack` / `hstack`), generators (`abs_matrix_ones`, `arange`, `linspace`, `eye`), Pandas-style numeric CSV (`abs_matrix_read_csv` / `write_csv`), functional utils (`abs_matrix_map`, `abs_matrix_filter`), SciKit-Learn-style preprocessing (`abs_matrix_one_hot_encode`, `abs_matrix_train_test_split` returning `[X_train, X_test, Y_train, Y_test]`), and the Pythonic `print_mat` / `foreach_mat` macros.
+- **Ultimate layer** — computational backends (`abs_set_backend` over `ABS_CPU` / `ABS_CPU_AVX` SIMD / `ABS_GPU_CUDA` stub) that `abs_matrix_mul` dispatches on, a Micrograd-style scalar autograd engine (`abs_scalar_new` / `add` / `mul` / `relu` / `sigmoid` with `abs_scalar_backward`), PPM image loading and saving with 2D convolution (`abs_img_load_ppm` / `save_ppm` / `conv2d`), ASCII and SVG plotting (`abs_plot_ascii` / `abs_plot_svg`), and a mixed-type DataFrame (`abs_df_create`, `abs_df_add_col_double` / `_string`, `abs_df_print`, `abs_df_free`).
+- **Spatial math** — modern type aliases (`i8`/`i16`/`i32`/`i64`/`isize`, `u8`/`u16`/`u32`/`u64`/`usize`, `f32`/`f64`, `b8`/`b32`, `byte`), anonymous-union vectors (`vec2`/`vec3`/`vec4`, `ivec2`/`ivec3`/`ivec4`, `vec2d`/`vec3d`/`vec4d`) with `x/y/z` and `r/g/b/a` aliases, column-major `mat2`/`mat3`/`mat4`, and quaternions — all plain value types (`abs_v2_*` / `abs_v3_*` / `abs_v4_*`, `abs_quat_*`, `abs_mat4_*`).
+- **Macro utilities** — `ABS_MIN`/`MAX`/`MIN3`/`MAX3`/`MIN4`/`MAX4`, `ABS_ABS`/`SIGN`/`CLAMP`/`CLAMP01`/`IN_RANGE`, `ABS_SQR`/`CUBE`/`DIFF`/`APPROX_EQ`, interpolation and shading (`ABS_LERP`/`UNLERP`/`REMAP`/`STEP`/`SMOOTHSTEP`), `ABS_DEG2RAD_M`/`RAD2DEG_M`, `ABS_ARRAY_LEN`/`OFFSETOF`/`CONTAINER_OF`, generic `ABS_SWAP` (+ `ABS_SWAP_T` fallback), bitwise (`ABS_BIT`, `ABS_BIT_SET`/`CLEAR`/`TOGGLE`/`CHECK`, `ABS_IS_POW2`, `ABS_ALIGN_UP`/`DOWN`), AI activations (`ABS_RELU_M`/`LEAKY_RELU_M`/`HEAVISIDE_M`), plus guard-checked unprefixed aliases (`MIN`, `MAX`, `CLAMP`, `LERP`, `REMAP`, `SIGN`, `SQR`, `ARRAY_LEN`, `SWAP`, `DEG2RAD`, `RAD2DEG`, `BIT`, `IS_POW2`).
+- **AI/ML** — `sigmoid` / `relu` / `tanh` activations with backprop-ready derivatives (`abs_diff_*`), row-wise `abs_matrix_softmax`, `abs_loss_mse`, classification `abs_accuracy`, and a central-difference `abs_grad` for numerical gradients, plus `abs_matrix_random` weight initialization.
+- **Combinatorics** — `factorial`, `nCr`, `nPr` (var) and `abs_factorial`, `abs_nCr`, `abs_nPr` (plain C ints).
 - **Paths & OS helpers** — `path_join`, `path_exists`, `getcwd_val`.
 - **CSV** — `csv_read` and `csv_write`.
 - **Threading** — `thread_start` / `thread_join` with a lock-guarded object pool for safe allocation from worker threads.
@@ -276,6 +282,46 @@ print(v("mean:"), abs_stats_mean(data));  /* 22.50 */
 print(v("stdev:"), abs_stats_stdev(data));/* 10.90 */
 ```
 
+### AI/ML: neural network forward pass
+
+```c
+static var square(var x) {
+    return abs_new_float(abs_num_val(x) * abs_num_val(x));
+}
+
+var X = abs_matrix_random(3, 2);          /* batch of 3 samples */
+var W1 = abs_matrix_random(2, 4);         /* 2 -> 4 hidden neurons */
+var W2 = abs_matrix_random(4, 1);
+
+var Z1 = abs_matrix_mul(X, W1);
+abs_matrix_apply(Z1, abs_act_sigmoid);    /* hidden activation */
+
+var Z2 = abs_matrix_mul(Z1, W2);
+abs_matrix_apply(Z2, abs_act_relu);       /* output predictions */
+
+print(abs_loss_mse(Y_true, Z2));          /* mean squared error */
+print(abs_grad(square, abs_new_float(3.0)));   /* 6.00 */
+```
+
+### AI/ML: backpropagation step
+
+```c
+var Z1 = abs_matrix_mul(X, W1);
+abs_matrix_add_row_vector(Z1, b1);        /* broadcast the bias in */
+var A1 = abs_matrix_copy(Z1);
+abs_matrix_apply(A1, abs_act_sigmoid);
+
+var Y_pred = ...;
+var Error = abs_matrix_sub(Y_pred, Y_true);
+var delta2 = abs_matrix_mul_element(Error,
+              abs_matrix_apply_deriv(Y_pred, abs_diff_sigmoid));
+
+var dW2 = abs_matrix_mul(abs_matrix_transpose(A1), delta2);
+var W2_new = abs_matrix_sub(W2, abs_matrix_scale(dW2, 0.1));   /* SGD */
+
+print(abs_accuracy(Y_true, Y_pred));      /* classification accuracy */
+```
+
 ### Exceptions, regex, and generators
 
 ```c
@@ -367,7 +413,7 @@ var rep = repeat(v("beep"), 3);          /* repeat() iterator */
 print(iter_next(rep));                   /* beep */
 ```
 
-More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`, `sci_demo.c`, `lang_demo.c`, `framework_demo.c`, `sort_demo.c`, `crypto_demo.c`) and are built as `build/examples/<name>`.
+More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`, `sci_demo.c`, `lang_demo.c`, `framework_demo.c`, `sort_demo.c`, `crypto_demo.c`, `ml_demo.c`, `ml_train_demo.c`, `math_demo.c`, `ds_demo.c`, `ultra_demo.c`, `geom_demo.c`, `demo_macros.c`) and are built as `build/examples/<name>`.
 
 ## Documentation
 
@@ -388,6 +434,7 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | Document | Description |
 | --- | --- |
 | [common-macros.md](docs/common-macros.md) | `ABS_API`, C++ interop, and `ABS_UNUSED`. |
+| [macros.md](docs/macros.md) | Numeric, interpolation, bitwise, alignment, struct, and AI activation macros. |
 | [dynamic-arrays.md](docs/dynamic-arrays.md) | `abs_dynarray` — generic dynamic array. |
 | [strings.md](docs/strings.md) | `abs_string` — growable NUL-terminated string. |
 | [hashing.md](docs/hashing.md) | `abs_hash` — FNV-1a and djb2. |
@@ -424,6 +471,11 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | Document | Description |
 | --- | --- |
 | [scientific.md](docs/scientific.md) | Matrices, statistics, advanced math, combinatorics, paths, CSV, and threading. |
+| [ml.md](docs/ml.md) | Activations and derivatives, broadcasting, softmax, loss, accuracy, and numerical gradients for neural networks. |
+| [general-math.md](docs/general-math.md) | Scalar math helpers, number theory, geometry, root finding, complex numbers, and raw-array statistics. |
+| [data-science.md](docs/data-science.md) | NumPy-style reshaping and generators, Pandas-style CSV, functional utils, and SciKit-Learn-style preprocessing. |
+| [ultimate.md](docs/ultimate.md) | Computational backends (AVX/GPU), scalar autograd, PPM vision and convolution, plotting, and dataframes. |
+| [spatial-math.md](docs/spatial-math.md) | Modern type aliases, 2D/3D/4D vectors, mat4, and quaternions. |
 
 ### Language features
 
@@ -480,6 +532,7 @@ graph TD
         fs[abs_fs - file I/O]
         rt[abs - Python-like runtime]
         sci[abs_* - matrices, stats, math, CSV, paths, threads]
+        ml[abs_ml - activations, loss, gradients]
         lang[abs_except, abs_regex, abs_datetime, abs_gen, abs_encode, abs_env - language features]
         fw[abs_server, abs_events, abs_plugins, abs_func, abs_introspect, abs_itertools - framework]
         algo[abs_sort - sorting, benchmarking, binary search]
@@ -499,6 +552,7 @@ graph TD
     fs --> common
     rt --> str
     sci --> rt
+    ml --> sci
     lang --> rt
     fw --> rt
     algo --> rt
@@ -551,6 +605,13 @@ Run the example programs:
 ./build/examples/framework_demo
 ./build/examples/sort_demo
 ./build/examples/crypto_demo
+./build/examples/ml_demo
+./build/examples/ml_train_demo
+./build/examples/math_demo
+./build/examples/ds_demo
+./build/examples/ultra_demo
+./build/examples/geom_demo
+./build/examples/demo_macros
 ```
 
 See [docs/development.md](docs/development.md) for details.
@@ -571,4 +632,4 @@ Abscom is released under the [MIT License](LICENSE).
 
 - Built with [Meson](https://mesonbuild.com/) and [Ninja](https://ninja-build.org/).
 - The dynamic runtime is inspired by the ergonomics of the [Python](https://www.python.org/) language.
-- Maintained by [rkriad585](https://github.com/rkriad585).
+- Maintained by [rkriad585](https://rkriad585.github.io).

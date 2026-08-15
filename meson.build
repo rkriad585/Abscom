@@ -1,5 +1,5 @@
 project('abscom', 'c',
-  version: '0.1.0',
+  version: '0.2.6',
   license: 'MIT',
   default_options: [
     'c_std=gnu11',
@@ -28,6 +28,12 @@ srcs = files(
   'src/abs_fs.c',
   'src/abs_matrix.c',
   'src/abs_stats.c',
+  'src/abs_complex.c',
+  'src/abs_ml.c',
+  'src/abs_scalar.c',
+  'src/abs_img.c',
+  'src/abs_plot.c',
+  'src/abs_df.c',
   'src/abs_csv.c',
   'src/abs_path.c',
   'src/abs_thread.c',
@@ -46,6 +52,7 @@ srcs = files(
   'src/abs_sort.c',
   'src/abs_crypto.c',
   'src/abs_ws.c',
+  'src/abs_geom.c',
   'src/abs.c',
 )
 

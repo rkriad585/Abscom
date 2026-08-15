@@ -40,6 +40,8 @@ static int visit(const char *key, void *value, void *user) {
 }
 ```
 
+For the large suite of everyday numeric, bitwise, and struct macros (`MIN`, `CLAMP`, `LERP`, `SWAP`, `ARRAY_LEN`, `CONTAINER_OF`, ...), see [Macro Utilities](macros.md).
+
 ## Include guards
 
 Each header uses a unique guard of the form `ABSCOM_ABS_<NAME>_H`, e.g. `ABSCOM_ABS_STRING_H`. You never need to touch these; they only prevent double inclusion.

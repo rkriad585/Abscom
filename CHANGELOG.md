@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - Unreleased
+## [0.2.6] - Unreleased
 
 ### Added
 
@@ -71,5 +71,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Named function objects (`abs_func.c`): `def(f, name)` adds a display name to `make_func`; `func_name` reads it back, and `print`/`str` render it as `<function name>`.
   - Target-aware decorators (`abs_func.c`): `decorate_func(target, wrapper)` builds a wrapper that receives `(target, args)` and calls back into `call_func(target, args)`, so pre/post logic can run around the original (Python `@decorator` style). `call_func` dispatches plain, memoized, and decorated functions transparently; the original stays reachable via `func_meta`/`func_name`.
   - The WebSocket API (handshake and framing) from the 13.0-style announcement was already delivered by the realtime and crypto layer.
-- Build system: Meson project with static + shared libraries, twenty-six tests, and nine example programs.
-- Documentation: README, `docs/` (including the language-features, framework, algorithm-suite, and realtime-and-crypto pages), logo, and standard project files.
+- AI/ML layer:
+  - Matrix arithmetic (`abs_matrix.c`): `abs_matrix_random` (uniform weights in `[-1, 1]`), element-wise `abs_matrix_add`/`abs_matrix_sub`, Hadamard `abs_matrix_mul_element`, `abs_matrix_scale`, `abs_matrix_add_scalar`, in-place `abs_matrix_apply`, deep `abs_matrix_copy`, and bias broadcasting via `abs_matrix_add_row_vector`.
+  - Reductions (`abs_matrix.c`): `abs_matrix_sum`, `abs_matrix_mean`, `abs_matrix_min`, `abs_matrix_max`, and flat `abs_matrix_argmax`.
+  - Activations and loss (`abs_ml.c`): `abs_act_sigmoid`, `abs_act_relu`, `abs_act_tanh` plus their backprop derivatives `abs_diff_sigmoid`/`abs_diff_relu`/`abs_diff_tanh` (given the activated output), `abs_matrix_apply_deriv` (copy-then-derive), row-wise in-place `abs_matrix_softmax` (max-subtraction stabilized), `abs_loss_mse`, and classification `abs_accuracy`.
+  - Numerical differentiation (`abs_ml.c`): `abs_grad` central-difference gradient `(f(x+h) - f(x-h)) / 2h` for any `AbsFunc`.
+  - Constants: `ABS_PI` and `ABS_E`.
+- General mathematics layer:
+  - Scalar utilities (`abs_stats.c`): `abs_sq`, `abs_cb`, `abs_clamp`, `abs_lerp`, and `abs_eq` (approximate equality within `ABS_EPSILON`).
+  - Number theory and discrete math (`abs_stats.c`): `abs_gcd`, `abs_lcm`, `abs_factorial`, `abs_is_prime`, `abs_fibonacci`, plus plain-C-int `abs_nPr`/`abs_nCr` (the `var` versions are `nPr`/`nCr`).
+  - Geometry (`abs_stats.c`): `abs_rad2deg`, `abs_hypot`, `abs_dist_euclidean`, `abs_dist_manhattan`.
+  - Root finding (`abs_stats.c`): `abs_root_find` Newton-Raphson solver, with an optional derivative or a finite-difference fallback.
+  - Complex numbers (`abs_complex.c`): a plain-value `AbsComplex` type with `abs_c_add`/`abs_c_sub`/`abs_c_mul`, `abs_c_mag`, `abs_c_conj`, and `abs_c_print`.
+  - Raw-array statistics (`abs_stats.c`): `abs_stat_mean`, `abs_stat_median`, `abs_stat_variance`, `abs_stat_stddev` over plain C `double` arrays.
+  - Constants: `ABS_SQRT2`, `ABS_PHI`, and `ABS_EPSILON`.
+- Data science layer:
+  - NumPy-style shape manipulation (`abs_matrix.c`): `abs_matrix_reshape`, `abs_matrix_flatten`, `abs_matrix_slice`, `abs_matrix_vstack`, and `abs_matrix_hstack` — all pure, returning new matrices.
+  - Generators (`abs_matrix.c`): `abs_matrix_ones`, `abs_matrix_arange` (1 x N, epsilon-tuned element count), and `abs_matrix_linspace` (1 x N, inclusive endpoints), alongside the existing `abs_matrix_new` (zeros) and `abs_matrix_eye`.
+  - Pandas-style numeric CSV (`abs_matrix.c`): `abs_matrix_read_csv` and `abs_matrix_write_csv` on matrices (the list-of-lists `csv_read`/`csv_write` remain).
+  - Functional utils (`abs_matrix.c`): `abs_matrix_map` (new matrix with `func` applied) and `abs_matrix_filter` (1 x N matrix of passing elements).
+  - SciKit-Learn-style preprocessing (`abs_ml.c`): `abs_matrix_one_hot_encode` (label vector to one-hot rows) and `abs_matrix_train_test_split` (returns a var list `[X_train, X_test, Y_train, Y_test]` by sequential slicing).
+  - Pythonic macros: `print_mat(m)` and `foreach_mat(item, m)`.
+- Ultimate layer:
+  - Computational backends (`abs_matrix.c`): an `AbsBackend` enum (`ABS_CPU`, `ABS_CPU_AVX`, `ABS_GPU_CUDA`) with `abs_set_backend`/`abs_get_backend`/`abs_backend_name`. `abs_matrix_mul` dispatches on it: an AVX kernel compiled only under `-mavx` (with a scalar fallback otherwise) and a CUDA simulation stub that warns once and falls back to the CPU.
+  - Scalar autograd (`abs_scalar.c`): a Micrograd-style computational graph of `double` scalars — `abs_scalar_new`/`abs_scalar_add`/`abs_scalar_mul`/`abs_scalar_relu`/`abs_scalar_sigmoid`, reverse-mode `abs_scalar_backward` (reverse topological order over shared subtrees), `abs_scalar_zero_grad`, `abs_scalar_val`/`abs_scalar_grad`, and recursive `abs_scalar_free`.
+  - Computer vision (`abs_img.c`): an `AbsImg` type with PPM loading (`abs_img_load_ppm`, P3 text and P6 binary, 8- and 16-bit), P3 saving (`abs_img_save_ppm`), zero-padded 2D convolution (`abs_img_conv2d`, per-channel, clamped), and `abs_img_free`.
+  - Plotting (`abs_plot.c`): terminal charts (`abs_plot_ascii`) and SVG line-chart export (`abs_plot_svg`), both safe on flat and single-point series.
+  - DataFrame (`abs_df.c`): a mixed-type `AbsDF`/`AbsCol`/`AbsColType` with `abs_df_create`, `abs_df_add_col_double`/`abs_df_add_col_string`, an aligned `abs_df_print`, and `abs_df_free`.
+- Spatial math and modern type aliases (`abs_geom.c`):
+  - Type aliases: `i8`/`i16`/`i32`/`i64`/`isize`, `u8`/`u16`/`u32`/`u64`/`usize`, `f32`/`f64`, `b8`/`b32`, and `byte`.
+  - Anonymous-union vectors: `vec2`/`vec2d`/`ivec2`, `vec3`/`vec3d`/`ivec3`, `vec4`/`vec4d`/`ivec4`, and `quat`, with overlapping components (`x/y/z`, `u/v`, `r/g/b/a`, and `raw[]`) and static inline constructors `v2`/`v3`/`v4`/`iv2`/`iv3`/`iv4`/`q4`.
+  - Vector ops (`abs_v2_*`/`abs_v3_*`/`abs_v4_*`): add, sub, scale, dot, cross, len, dist, norm, lerp, reflect, and print.
+  - Quaternions (`abs_quat_*`): identity, Hamilton `abs_quat_mul`, `abs_quat_norm`, `abs_quat_from_axis_angle`, `abs_quat_rotate_vec3`, and print.
+  - Fixed-size matrices (`abs_mat4_*`): identity, mul, mul_vec4, translate, scale, rotate_x/y/z, perspective, look_at, and print; `mat2`/`mat3` type aliases alongside.
+- Macro utilities (`abs.h`):
+  - Arithmetic and comparison: `ABS_MIN`/`ABS_MAX`/`ABS_MIN3`/`ABS_MAX3`/`ABS_MIN4`/`ABS_MAX4`, `ABS_ABS`, `ABS_SIGN`, `ABS_CLAMP`, `ABS_CLAMP01`, and `ABS_IN_RANGE`.
+  - Powers and equality: `ABS_SQR`, `ABS_CUBE`, `ABS_DIFF`, and `ABS_APPROX_EQ`.
+  - Interpolation and shading: `ABS_LERP`, `ABS_UNLERP`, `ABS_REMAP`, `ABS_STEP`, and `ABS_SMOOTHSTEP` (portable `static inline` implementation).
+  - Angle conversion: `ABS_DEG2RAD_M` and `ABS_RAD2DEG_M`.
+  - Arrays, structs, and memory: `ABS_ARRAY_LEN`, `ABS_OFFSETOF`, and `ABS_CONTAINER_OF`.
+  - Generic `ABS_SWAP` via `__typeof__` (GCC/Clang) with an explicit-type `ABS_SWAP_T` fallback.
+  - Bitwise and alignment: `ABS_BIT`, `ABS_BIT_SET`/`ABS_BIT_CLEAR`/`ABS_BIT_TOGGLE`/`ABS_BIT_CHECK`, `ABS_IS_POW2`, `ABS_ALIGN_UP`, and `ABS_ALIGN_DOWN`.
+  - AI activations: `ABS_RELU_M`, `ABS_LEAKY_RELU_M`, and `ABS_HEAVISIDE_M`.
+  - Guard-checked unprefixed aliases (`MIN`, `MAX`, `CLAMP`, `CLAMP01`, `LERP`, `REMAP`, `SIGN`, `SQR`, `ARRAY_LEN`, `SWAP`, `DEG2RAD`, `RAD2DEG`, `BIT`, `IS_POW2`) that only define when the name is not already taken.
+- Build system: Meson project with static + shared libraries, thirty-one tests, and sixteen example programs.
+- Documentation: README, `docs/` (including the language-features, framework, algorithm-suite, realtime-and-crypto, spatial-math, and macro-utilities pages), logo, and standard project files.

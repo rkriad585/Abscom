@@ -10,7 +10,7 @@
 #   make build-make BUILDDIR=out       pick a different build directory
 #   make SHARED=no                     skip the shared library
 
-VERSION := 0.1.0
+VERSION := 0.2.6
 
 CC      ?= cc
 AR      ?= ar
@@ -37,6 +37,12 @@ SRCS := \
 	src/abs_fs.c \
 	src/abs_matrix.c \
 	src/abs_stats.c \
+	src/abs_complex.c \
+	src/abs_ml.c \
+	src/abs_scalar.c \
+	src/abs_img.c \
+	src/abs_plot.c \
+	src/abs_df.c \
 	src/abs_csv.c \
 	src/abs_path.c \
 	src/abs_thread.c \
@@ -55,15 +61,16 @@ SRCS := \
 	src/abs_sort.c \
 	src/abs_crypto.c \
 	src/abs_ws.c \
+	src/abs_geom.c \
 	src/abs.c
 OBJS := $(patsubst src/%.c,$(OBJDIR)/%.o,$(SRCS))
 
 TESTS    := test_dynarray test_string test_hash test_hashmap test_platform test_abs \
-            test_matrix test_stats test_csv test_path test_thread \
+            test_matrix test_ml test_stats test_math test_csv test_path test_thread \
             test_regex test_except test_datetime test_gen test_encode test_env \
             test_server test_events test_plugins test_func test_introspect test_itertools \
-            test_sort test_crypto test_ws
-EXAMPLES := demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo crypto_demo
+            test_sort test_crypto test_ws test_ultra test_geom test_macros
+EXAMPLES := demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo crypto_demo ml_demo ml_train_demo math_demo ds_demo ultra_demo geom_demo demo_macros
 
 # Windows (MinGW/MSYS) links ws2_32; POSIX links libm and pthreads.
 ifeq ($(OS),Windows_NT)

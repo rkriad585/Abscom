@@ -11,7 +11,7 @@ static var api_home(var req) {
 
 static var api_about(var req) {
     (void)req;
-    return v("{\"framework\": \"abscom\", \"version\": \"0.1.0\"}");
+    return v("{\"framework\": \"abscom\", \"version\": \"0.2.6\"}");
 }
 
 /* --- 2. Event handlers --- */

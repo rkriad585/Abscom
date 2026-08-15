@@ -59,7 +59,7 @@ $ErrorActionPreference = 'Stop'
 $Owner = 'rkriad585'
 $Repo = 'Abscom'
 $Branch = 'main'
-$Version = '0.1.0'
+$Version = '0.2.6'
 
 $localSrc = ''
 if ($PSScriptRoot -and (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'meson.build'))) {

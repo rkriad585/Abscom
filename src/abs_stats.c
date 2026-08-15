@@ -1,6 +1,7 @@
 #include "abscom/abs.h"
 
 #include <math.h>
+#include <stdlib.h>
 
 static bool is_num_obj(var o) {
     return o && (o->type == ABS_INT || o->type == ABS_FLOAT);
@@ -87,7 +88,7 @@ var sqrt_val(var x)  { return num_func(sqrt, x, "sqrt_val expects a number"); }
 
 var deg2rad(var x) {
     if (!is_num_obj(x)) return abs_new_error("deg2rad expects a number");
-    return abs_new_float(abs_num_val(x) * 3.14159265358979323846 / 180.0);
+    return abs_new_float(abs_num_val(x) * ABS_PI / 180.0);
 }
 
 static long long fact_rec(long n) {
@@ -124,4 +125,181 @@ var nPr(var n, var r) {
     long long d = fact_rec(N - R);
     if (d == 0) return abs_new_int(0);
     return abs_new_int((long)(a / d));
+}
+
+/* --- Scalar utilities --- */
+
+double abs_sq(double x) { return x * x; }
+
+double abs_cb(double x) { return x * x * x; }
+
+double abs_clamp(double x, double min, double max) {
+    if (x < min) return min;
+    if (x > max) return max;
+    return x;
+}
+
+double abs_lerp(double a, double b, double t) {
+    return a + t * (b - a);
+}
+
+int abs_eq(double a, double b) {
+    return fabs(a - b) < ABS_EPSILON;
+}
+
+/* --- Number theory and discrete math --- */
+
+long abs_gcd(long a, long b) {
+    if (a < 0) a = -a;
+    if (b < 0) b = -b;
+    while (b != 0) {
+        long t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}
+
+long abs_lcm(long a, long b) {
+    long g = abs_gcd(a, b);
+    if (g == 0) return 0;
+    long long r = ((long long)(a / g)) * b;
+    return (long)(r < 0 ? -r : r);
+}
+
+long abs_factorial(int n) {
+    if (n < 0) return 0;
+    long long res = 1;
+    for (int i = 2; i <= n; i++) res *= i;
+    return (long)res;
+}
+
+int abs_is_prime(long n) {
+    if (n <= 1) return 0;
+    if (n <= 3) return 1;
+    if (n % 2 == 0 || n % 3 == 0) return 0;
+    for (long i = 5; i * i <= n; i += 6)
+        if (n % i == 0 || n % (i + 2) == 0) return 0;
+    return 1;
+}
+
+long abs_fibonacci(int n) {
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    long long a = 0, b = 1;
+    for (int i = 2; i <= n; i++) {
+        long long c = a + b;
+        a = b;
+        b = c;
+    }
+    return (long)b;
+}
+
+/* --- Combinatorics (plain C ints) --- */
+
+long abs_nPr(int n, int r) {
+    if (r < 0 || r > n) return 0;
+    long long res = 1;
+    for (int i = 0; i < r; i++) res *= (n - i);
+    return (long)res;
+}
+
+long abs_nCr(int n, int r) {
+    if (r < 0 || r > n) return 0;
+    if (r == 0 || r == n) return 1;
+    if (r > n / 2) r = n - r;
+    long long res = 1;
+    for (int i = 0; i < r; i++) {
+        res = res * (n - i) / (i + 1);
+    }
+    return (long)res;
+}
+
+/* --- Geometry --- */
+
+double abs_rad2deg(double rad) {
+    return rad * (180.0 / ABS_PI);
+}
+
+double abs_hypot(double a, double b) {
+    return sqrt(a * a + b * b);
+}
+
+double abs_dist_euclidean(double x1, double y1, double x2, double y2) {
+    double dx = x2 - x1;
+    double dy = y2 - y1;
+    return sqrt(dx * dx + dy * dy);
+}
+
+double abs_dist_manhattan(double x1, double y1, double x2, double y2) {
+    return fabs(x2 - x1) + fabs(y2 - y1);
+}
+
+/* --- Numerical analysis --- */
+
+double abs_root_find(double (*f)(double), double (*f_prime)(double),
+                     double guess) {
+    double x = guess;
+    for (int i = 0; i < 100; i++) {
+        double y = f(x);
+        double dy;
+        if (f_prime) {
+            dy = f_prime(x);
+        } else {
+            double h = 1e-6;
+            dy = (f(x + h) - f(x - h)) / (2.0 * h);
+        }
+        if (fabs(dy) < ABS_EPSILON) break;
+        double step = y / dy;
+        x -= step;
+        if (fabs(step) < ABS_EPSILON) return x;
+    }
+    return x;
+}
+
+/* --- Raw double-array statistics --- */
+
+static int cmp_dbl(const void *a, const void *b) {
+    double va = *(const double *)a;
+    double vb = *(const double *)b;
+    if (va < vb) return -1;
+    if (va > vb) return 1;
+    return 0;
+}
+
+double abs_stat_mean(double *arr, int size) {
+    if (size <= 0 || !arr) return 0.0;
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) sum += arr[i];
+    return sum / (double)size;
+}
+
+double abs_stat_median(double *arr, int size) {
+    if (size <= 0 || !arr) return 0.0;
+    double *temp = (double *)malloc((size_t)size * sizeof(double));
+    if (!temp) return 0.0;
+    for (int i = 0; i < size; i++) temp[i] = arr[i];
+    qsort(temp, (size_t)size, sizeof(double), cmp_dbl);
+    double med;
+    if (size % 2 == 0)
+        med = (temp[size / 2 - 1] + temp[size / 2]) / 2.0;
+    else
+        med = temp[size / 2];
+    free(temp);
+    return med;
+}
+
+double abs_stat_variance(double *arr, int size) {
+    if (size <= 1 || !arr) return 0.0;
+    double m = abs_stat_mean(arr, size);
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        double d = arr[i] - m;
+        sum += d * d;
+    }
+    return sum / (double)size;
+}
+
+double abs_stat_stddev(double *arr, int size) {
+    return sqrt(abs_stat_variance(arr, size));
 }
