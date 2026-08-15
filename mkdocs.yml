@@ -73,8 +73,23 @@ nav:
       - File Handles: runtime-files.md
       - System and Processes: system.md
       - Error Handling: error-handling.md
+  - Language Features:
+      - Exceptions and Context Managers: exceptions.md
+      - Regular Expressions: regex.md
+      - Date and Time: datetime.md
+      - Generators: generators.md
+      - Encoding and Environment: encoding-and-env.md
   - Scientific:
       - Matrices, Statistics, and More: scientific.md
+  - Framework:
+      - Web Server: web-server.md
+      - Events: events.md
+      - Plugins: plugins.md
+      - Function Objects and Decorators: functions.md
+      - Introspection: introspection.md
+      - Itertools: itertools.md
+  - Algorithm Suite:
+      - Sorting, Search, and Benchmarking: sorting.md
   - Architecture: architecture.md
   - Configuration: configuration.md
   - Development: development.md

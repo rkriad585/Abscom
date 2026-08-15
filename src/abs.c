@@ -18,6 +18,7 @@
 #else
 #include <unistd.h>
 #include <pthread.h>
+#include <dlfcn.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -122,6 +123,27 @@ static void free_internals(var obj) {
             free(obj->val.thread.handle);
 #endif
             break;
+        case ABS_SERVER:
+            if (obj->val.server.socket_fd >= 0) {
+#ifdef _WIN32
+                closesocket((SOCKET)(intptr_t)obj->val.server.socket_fd);
+#else
+                close((int)obj->val.server.socket_fd);
+#endif
+                obj->val.server.socket_fd = -1;
+            }
+            break;
+        case ABS_LIB:
+            if (obj->val.lib.handle) {
+#ifdef _WIN32
+                FreeLibrary((HMODULE)obj->val.lib.handle);
+#else
+                dlclose(obj->val.lib.handle);
+#endif
+            }
+            free(obj->val.lib.path);
+            obj->val.lib.path = NULL;
+            break;
         default:
             break;
     }
@@ -143,6 +165,8 @@ void abs_init(void) {
         pool_index = 0;
     }
     gc_dynamic_head = NULL;
+    abs_env_idx = 0;
+    abs_last_error = NULL;
 #ifdef _WIN32
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
@@ -412,6 +436,12 @@ static void print_single(var obj) {
             break;
         }
         case ABS_THREAD: printf("<thread>"); break;
+        case ABS_TIME: printf("<datetime>"); break;
+        case ABS_GENERATOR: printf("<generator>"); break;
+        case ABS_SERVER: printf("<Server Port:%d>", obj->val.server.port); break;
+        case ABS_LIB: printf("<library %s>", obj->val.lib.path ? obj->val.lib.path : ""); break;
+        case ABS_FUNC: printf("<function>"); break;
+        case ABS_ITERATOR: printf("<iterator>"); break;
     }
 }
 
@@ -620,6 +650,27 @@ static void str_build(abs_string_t *s, var obj) {
         }
         case ABS_THREAD:
             abs_string_append_cstr(s, "<thread>");
+            break;
+        case ABS_TIME:
+            abs_string_append_cstr(s, "<datetime>");
+            break;
+        case ABS_GENERATOR:
+            abs_string_append_cstr(s, "<generator>");
+            break;
+        case ABS_SERVER: {
+            char srv_buf[64];
+            snprintf(srv_buf, sizeof(srv_buf), "<Server Port:%d>", obj->val.server.port);
+            abs_string_append_cstr(s, srv_buf);
+            break;
+        }
+        case ABS_LIB:
+            abs_string_append_cstr(s, "<library>");
+            break;
+        case ABS_FUNC:
+            abs_string_append_cstr(s, "<function>");
+            break;
+        case ABS_ITERATOR:
+            abs_string_append_cstr(s, "<iterator>");
             break;
     }
 }
@@ -867,6 +918,15 @@ var fopen_safe(const char *filename, const char *mode) {
         fclose(f);
         return NULL;
     }
+    obj->type = ABS_FILE;
+    obj->val.file_ptr = f;
+    track_dynamic(obj);
+    return obj;
+}
+
+var abs_new_file(FILE *f) {
+    var obj = pool_alloc();
+    if (!obj) return NULL;
     obj->type = ABS_FILE;
     obj->val.file_ptr = f;
     track_dynamic(obj);
@@ -1143,6 +1203,12 @@ var type(var obj) {
         case ABS_INSTANCE: return abs_new_str("<class 'instance'>");
         case ABS_MATRIX:  return abs_new_str("<class 'matrix'>");
         case ABS_THREAD:  return abs_new_str("<class 'thread'>");
+        case ABS_TIME:    return abs_new_str("<class 'datetime'>");
+        case ABS_GENERATOR: return abs_new_str("<class 'generator'>");
+        case ABS_SERVER:  return abs_new_str("<class 'server'>");
+        case ABS_LIB:     return abs_new_str("<class 'library'>");
+        case ABS_FUNC:    return abs_new_str("<class 'function'>");
+        case ABS_ITERATOR: return abs_new_str("<class 'iterator'>");
         default:        return abs_new_str("<class 'NoneType'>");
     }
 }

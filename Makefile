@@ -40,12 +40,28 @@ SRCS := \
 	src/abs_csv.c \
 	src/abs_path.c \
 	src/abs_thread.c \
+	src/abs_except.c \
+	src/abs_regex.c \
+	src/abs_datetime.c \
+	src/abs_gen.c \
+	src/abs_encode.c \
+	src/abs_env.c \
+	src/abs_server.c \
+	src/abs_events.c \
+	src/abs_plugins.c \
+	src/abs_func.c \
+	src/abs_introspect.c \
+	src/abs_itertools.c \
+	src/abs_sort.c \
 	src/abs.c
 OBJS := $(patsubst src/%.c,$(OBJDIR)/%.o,$(SRCS))
 
 TESTS    := test_dynarray test_string test_hash test_hashmap test_platform test_abs \
-            test_matrix test_stats test_csv test_path test_thread
-EXAMPLES := demo py_demo data_demo v6_demo sci_demo
+            test_matrix test_stats test_csv test_path test_thread \
+            test_regex test_except test_datetime test_gen test_encode test_env \
+            test_server test_events test_plugins test_func test_introspect test_itertools \
+            test_sort
+EXAMPLES := demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo
 
 # Windows (MinGW/MSYS) links ws2_32; POSIX links libm and pthreads.
 ifeq ($(OS),Windows_NT)
@@ -59,6 +75,7 @@ else
     SHLIB := $(BUILDDIR)/libabscom.dylib
   else
     SHLIB := $(BUILDDIR)/libabscom.so
+    PLATFORM_LIBS += -ldl
   endif
   EXEEXT :=
 endif

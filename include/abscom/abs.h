@@ -11,6 +11,9 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
+#include <setjmp.h>
 
 ABS_BEGIN_C_DECLS
 
@@ -28,12 +31,23 @@ typedef enum {
     ABS_CLASS,
     ABS_INSTANCE,
     ABS_MATRIX,
-    ABS_THREAD
+    ABS_THREAD,
+    ABS_TIME,       /* datetime object */
+    ABS_GENERATOR,  /* stateful iterator */
+    ABS_SERVER,     /* web server object */
+    ABS_LIB,        /* dynamically loaded library */
+    ABS_FUNC,       /* wrapped C function / decorator / memoized callable */
+    ABS_ITERATOR    /* itertools chain/cycle state machine */
 } AbsType;
 
 typedef struct AbsObj AbsObj;
 typedef AbsObj *var;
 typedef var (*AbsThreadFunc)(var);
+typedef var (*AbsGenFunc)(var);
+typedef var (*AbsFunc)(var); /* standard signature: var -> var */
+
+/* Opaque handle to a shared library: HMODULE on Windows, void* on POSIX. */
+typedef void *LibHandle;
 
 typedef struct DictNode {
     char *key;
@@ -77,6 +91,34 @@ typedef struct AbsObj {
             AbsObj *arg;
             AbsObj *result;
         } thread;
+        struct {
+            struct tm tm_val;
+        } time_data;
+        struct {
+            AbsGenFunc func;
+            long state;
+            long limit;
+            long step;
+        } gen;
+        struct {
+            int port;
+            intptr_t socket_fd; /* SOCKET on Windows, int fd on POSIX */
+            AbsObj *routes;     /* ABS_DICT: path -> ABS_FUNC */
+        } server;
+        struct {
+            LibHandle handle;
+            char *path;
+        } lib;
+        struct {
+            AbsFunc func_ptr;
+            AbsObj *cache;    /* ABS_DICT used by memoize(); NULL otherwise */
+            AbsObj *metadata; /* original function kept by decorate() */
+        } func;
+        struct {
+            AbsObj *source_a;
+            AbsObj *source_b; /* NULL for cycle() */
+            long index;
+        } iter;
         FILE *file_ptr;
         char *error_msg;
     } val;
@@ -84,7 +126,6 @@ typedef struct AbsObj {
 } AbsObj;
 
 typedef AbsObj *var;
-typedef var (*AbsFunc)(var);
 typedef var (*AbsMapFunc)(var);
 typedef bool (*AbsFilterFunc)(var);
 
@@ -101,6 +142,7 @@ ABS_API var abs_new_list(void);
 ABS_API var abs_new_dict(void);
 ABS_API var abs_new_set(void);
 ABS_API var abs_new_error(const char *msg);
+ABS_API var abs_new_file(FILE *f);
 
 /* Low-level object helpers used by the runtime and the scientific modules. */
 ABS_API var abs_new_obj(AbsType type);
@@ -281,6 +323,131 @@ ABS_API void csv_write(const char *filename, var list_of_lists);
 
 ABS_API var thread_start(AbsThreadFunc func, var arg);
 ABS_API var thread_join(var thread_obj);
+
+/* --- Language features: exceptions, regex, datetime, generators, encoding --- */
+
+/* Exception handling: try / catch / end_try + throw. The jmp_buf stack and the
+ * last thrown error live here so nested try blocks work. */
+#define ABS_ENV_STACK_SIZE 10
+
+ABS_API extern jmp_buf abs_env_stack[ABS_ENV_STACK_SIZE];
+ABS_API extern int abs_env_idx;
+ABS_API extern var abs_last_error;
+
+/* Generic resource cleanup used by the with() context-manager macro. */
+ABS_API void close_resource(var obj);
+
+#ifndef __cplusplus
+/* C++ reserves try/catch/throw, so the control-flow API is C-only. */
+ABS_API jmp_buf *abs_push_jmp(void);
+ABS_API void abs_pop_jmp(void);
+ABS_API void throw(const char *msg);
+
+#define try if (setjmp(*abs_push_jmp()) == 0)
+#define catch(VAR) else if ((VAR = abs_last_error, 1))
+#define end_try abs_pop_jmp()
+
+/* Runs INIT, executes the body exactly once, then calls close_resource(). */
+#define with(VAR, INIT)                                                        \
+    for (var VAR = (INIT), _once_##VAR = (var)1; _once_##VAR;                  \
+         _once_##VAR = NULL, close_resource(VAR))
+#endif
+
+/* Regex: a small matcher supporting . (any), * (closure), ^ and $ anchors. */
+ABS_API bool re_match(var pattern, var text);
+ABS_API var re_findall(var pattern, var text);
+ABS_API var re_sub(var pattern, var repl, var text);
+
+/* Date & time. */
+ABS_API var datetime_now(void);
+ABS_API var strftime_val(const char *fmt, var time_obj);
+ABS_API var timedelta(int days, int seconds);
+
+/* Generators. */
+ABS_API var range_gen(long start, long stop, long step);
+ABS_API var next(var gen);
+
+/* Encoding and environment. */
+ABS_API var base64_encode(var str_obj);
+ABS_API var uuid4(void);
+ABS_API var os_getenv(const char *key);
+ABS_API void os_setenv(const char *key, const char *val);
+
+/* --- Framework layer: web server, events, plugins, functions, introspection --- */
+
+/* 1. Micro web server (synchronous HTTP/1.1 over raw sockets). */
+ABS_API var Server(int port);
+ABS_API void route(var app, const char *path, AbsFunc handler);
+ABS_API void server_run(var app);
+/* Dispatch one request line ("GET /path HTTP/1.1"); returns the body var or
+ * NULL when no route matches. Used by server_run() and by the tests. */
+ABS_API var server_handle(var app, const char *request_line);
+
+/* 2. Event emitter: a dict of event name -> list of ABS_FUNC handlers. */
+ABS_API var EventBus(void);
+ABS_API void on(var bus, const char *event_name, AbsFunc handler);
+ABS_API void emit(var bus, const char *event_name, var data);
+
+/* 3. Dynamic plugins (LoadLibrary/dlopen). */
+ABS_API var load_library(const char *path);
+ABS_API var call_lib_func(var lib, const char *func_name, var arg);
+
+/* 4. Function objects, decorators and memoization. */
+ABS_API var make_func(AbsFunc f);
+ABS_API var call_func(var func_obj, var arg);
+ABS_API var call_memoized(var func_obj, var arg);
+ABS_API var decorate(var func_obj, AbsFunc wrapper_logic);
+ABS_API var func_meta(var func_obj);
+ABS_API var memoize(AbsFunc f);
+
+/* 5. Introspection. */
+ABS_API var dir(var obj);
+ABS_API var id(var obj);
+ABS_API var repr(var obj);
+
+/* 6. Itertools: chain / cycle iterators. */
+ABS_API var chain(var list_a, var list_b);
+ABS_API var cycle(var list);
+ABS_API var iter_next(var iter);
+
+/* --- Algorithm suite: sorting, benchmarking, binary search --- */
+
+/* Visualizer callback: called with the list and the two swapped indices. */
+typedef void (*AbsSortVis)(var list, int idx_a, int idx_b);
+
+/* Copy a list. Primitive elements (ints, floats, strings, bools) are copied;
+ * nested containers are shared. */
+ABS_API var list_copy(var list);
+ABS_API bool is_sorted(var list);
+
+/* O(n^2) - educational. */
+ABS_API void sort_bubble(var list);
+ABS_API void sort_selection(var list);
+ABS_API void sort_insertion(var list);
+
+/* O(n log n) - efficient. */
+ABS_API void sort_shell(var list);
+ABS_API void sort_heap(var list);
+ABS_API void sort_merge(var list);
+ABS_API void sort_quick(var list);
+
+/* Linear / integer-only. */
+ABS_API void sort_counting(var list);
+ABS_API void sort_radix(var list);
+ABS_API void sort_bucket(var list);
+
+/* Novelty / standard library. */
+ABS_API void sort_bogo(var list);
+ABS_API void sort_c_qsort(var list);
+
+/* Bubble sort that invokes vis_func on every swap. */
+ABS_API void sort_bubble_visual(var list, AbsSortVis vis_func);
+
+/* Time sort_func on a copy of list, returning seconds. */
+ABS_API double timeit(void (*sort_func)(var), var list);
+
+/* Binary search on a sorted list; returns the index or -1. */
+ABS_API long binary_search(var sorted_list, var target);
 
 ABS_END_C_DECLS
 

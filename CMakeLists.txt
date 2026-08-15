@@ -27,6 +27,19 @@ set(ABSCOM_SOURCES
   src/abs_csv.c
   src/abs_path.c
   src/abs_thread.c
+  src/abs_except.c
+  src/abs_regex.c
+  src/abs_datetime.c
+  src/abs_gen.c
+  src/abs_encode.c
+  src/abs_env.c
+  src/abs_server.c
+  src/abs_events.c
+  src/abs_plugins.c
+  src/abs_func.c
+  src/abs_introspect.c
+  src/abs_itertools.c
+  src/abs_sort.c
   src/abs.c
 )
 
@@ -53,6 +66,10 @@ else()
   find_package(Threads)
   if(Threads_FOUND)
     list(APPEND ABSCOM_PLATFORM_LIBS Threads::Threads)
+  endif()
+  find_library(ABSCOM_DL_LIBRARY NAMES dl)
+  if(ABSCOM_DL_LIBRARY)
+    list(APPEND ABSCOM_PLATFORM_LIBS ${ABSCOM_DL_LIBRARY})
   endif()
 endif()
 
@@ -88,7 +105,10 @@ endif()
 if(ABSCOM_BUILD_TESTS)
   enable_testing()
   foreach(t IN ITEMS test_dynarray test_string test_hash test_hashmap test_platform test_abs
-                   test_matrix test_stats test_csv test_path test_thread)
+                   test_matrix test_stats test_csv test_path test_thread
+                   test_regex test_except test_datetime test_gen test_encode test_env
+                   test_server test_events test_plugins test_func test_introspect test_itertools
+                   test_sort)
     add_executable(${t} tests/${t}.c)
     target_link_libraries(${t} PRIVATE abscom_static)
     add_test(NAME ${t} COMMAND ${t})
@@ -96,7 +116,7 @@ if(ABSCOM_BUILD_TESTS)
 endif()
 
 if(ABSCOM_BUILD_EXAMPLES)
-  foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo)
+  foreach(ex IN ITEMS demo py_demo data_demo v6_demo sci_demo lang_demo framework_demo sort_demo)
     add_executable(${ex} examples/${ex}.c)
     target_link_libraries(${ex} PRIVATE abscom_static)
   endforeach()

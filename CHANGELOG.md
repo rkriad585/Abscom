@@ -42,5 +42,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Paths and OS helpers: `path_join`, `path_exists`, `getcwd_val`.
   - CSV: `csv_read` and `csv_write`.
   - Threading: `thread_start`/`thread_join` with a new `ABS_THREAD` type and lock-guarded memory pool for thread-safe allocation.
-- Build system: Meson project with static + shared libraries, eleven tests, and five example programs.
-- Documentation: README, `docs/`, logo, and standard project files.
+- Language features:
+  - Exceptions and context managers: `try`/`catch`/`end_try` + `throw` with a `setjmp`/`longjmp` env stack (`abs_except.c`), plus the `with(VAR, INIT)` macro and `close_resource`.
+  - A small regex engine (`abs_regex.c`): `re_match`, `re_findall`, and `re_sub` with `.`/`*`/`^`/`$` support.
+  - Date/time (`abs_datetime.c`): `datetime_now`, `strftime_val`, and `timedelta` on a new `ABS_TIME` type.
+  - Generators (`abs_gen.c`): `range_gen`/`next` on a new `ABS_GENERATOR` type.
+  - Encoding (`abs_encode.c`): `base64_encode` and RFC 4122 version-4 `uuid4`.
+  - Environment variables (`abs_env.c`): `os_getenv`/`os_setenv` with a safe Windows `putenv` implementation.
+  - `abs_new_file` to wrap a raw `FILE*` as an `ABS_FILE` object.
+- Framework layer:
+  - Micro web server (`abs_server.c`): `Server`/`route`/`server_run` on a new `ABS_SERVER` type, plus a socket-free `server_handle` dispatcher that returns `NULL` for 404.
+  - Event emitter (`abs_events.c`): `EventBus`/`on`/`emit` with per-event handler lists on a new `ABS_FUNC` representation.
+  - Dynamic plugins (`abs_plugins.c`): `load_library`/`call_lib_func` via `LoadLibrary` on Windows and `dlopen`/`dlsym` on POSIX, on a new `ABS_LIB` type.
+  - Function objects (`abs_func.c`): `make_func`, `call_func`, `memoize`/`call_memoized` with an argument-keyed cache, and `decorate`/`func_meta` decorators.
+  - Introspection (`abs_introspect.c`): `id`, `repr`, and `dir`.
+  - Itertools (`abs_itertools.c`): `chain` and `cycle` iterators plus `iter_next` on a new `ABS_ITERATOR` type.
+- Algorithm suite:
+  - Sorting (`abs_sort.c`): twelve algorithms on the runtime's lists — bubble, selection, insertion (O(n²)), shell, heap, merge, quick, and a C `qsort` wrapper (O(n log n)), plus counting, radix, and bucket sorts (O(n), integers only) and the joke `sort_bogo`.
+  - Visualization: `sort_bubble_visual` calls an `AbsSortVis` hook on every swap.
+  - Benchmarking: `timeit` times any sort function on a deep-copied list and returns seconds.
+  - Search and helpers: `binary_search` for sorted lists, plus `is_sorted` and `list_copy`.
+- Build system: Meson project with static + shared libraries, twenty-four tests, and eight example programs.
+- Documentation: README, `docs/` (including the language-features, framework, and algorithm-suite pages), logo, and standard project files.

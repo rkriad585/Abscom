@@ -16,6 +16,7 @@ if ['windows', 'cygwin'].contains(host_machine.system())
 else
   platform_deps += cc.find_library('m', required: false)
   platform_deps += cc.find_library('pthread', required: false)
+  platform_deps += cc.find_library('dl', required: false)
 endif
 
 srcs = files(
@@ -30,6 +31,19 @@ srcs = files(
   'src/abs_csv.c',
   'src/abs_path.c',
   'src/abs_thread.c',
+  'src/abs_except.c',
+  'src/abs_regex.c',
+  'src/abs_datetime.c',
+  'src/abs_gen.c',
+  'src/abs_encode.c',
+  'src/abs_env.c',
+  'src/abs_server.c',
+  'src/abs_events.c',
+  'src/abs_plugins.c',
+  'src/abs_func.c',
+  'src/abs_introspect.c',
+  'src/abs_itertools.c',
+  'src/abs_sort.c',
   'src/abs.c',
 )
 

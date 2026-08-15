@@ -21,7 +21,7 @@
 
 ## Overview
 
-Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C, plus a scientific layer with matrices, statistics, advanced math, CSV, path helpers, and basic threading. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
+Abscom bundles low-level building blocks — dynamic arrays, growable strings, hash functions, an open-addressing hash map, timing helpers, and simple file I/O — under a single umbrella header. On top of that it ships a Python-inspired dynamic runtime that brings `var` values, lists, dictionaries, sets, JSON, random utilities, and a light object system to plain C, plus a scientific layer with matrices, statistics, advanced math, CSV, path helpers, and basic threading. A language-features layer adds exceptions (`try`/`catch`), context managers (`with`), regex, date/time, generators, base64/UUID, and environment variables. A framework layer tops it off with a micro web server, an event emitter, dynamic plugins, function objects with memoization and decorators, introspection, and itertools-style iterators. An algorithm suite rounds it out with twelve sorting algorithms, a swap-hook visualizer, `timeit` benchmarking, and binary search. The library has no dependencies beyond the C standard library (plus Winsock on Windows) and is built and tested with Meson.
 
 ## Screenshots
 
@@ -86,6 +86,21 @@ Abscom bundles low-level building blocks — dynamic arrays, growable strings, h
 - **Paths & OS helpers** — `path_join`, `path_exists`, `getcwd_val`.
 - **CSV** — `csv_read` and `csv_write`.
 - **Threading** — `thread_start` / `thread_join` with a lock-guarded object pool for safe allocation from worker threads.
+- **Exceptions** — `try` / `catch` / `end_try` + `throw`, with `with(VAR, INIT)` context managers and `close_resource` for automatic cleanup.
+- **Regex** — `re_match`, `re_findall`, and `re_sub` with `.` / `*` / `^` / `$` support.
+- **Date & time** — `datetime_now`, `strftime_val`, and `timedelta`.
+- **Generators** — lazy `range_gen` / `next` sequences.
+- **Encoding & env** — `base64_encode`, version-4 `uuid4`, and `os_getenv` / `os_setenv`.
+- **Web server** — `Server` / `route` / `server_run` micro HTTP server plus a socket-free `server_handle` dispatcher for testing.
+- **Events** — `EventBus` / `on` / `emit` publish-subscribe with per-event handler lists.
+- **Plugins** — `load_library` / `call_lib_func` dynamic library loading (`LoadLibrary` / `dlopen`).
+- **Function objects** — `make_func`, `call_func`, `memoize` / `call_memoized` caching, and `decorate` / `func_meta` decorators.
+- **Introspection** — `id`, `repr`, and `dir` for object identity, debugging, and key listing.
+- **Itertools** — lazy `chain` and `cycle` iterators with `iter_next`.
+- **Sorting suite** — twelve algorithms from `O(n²)` (bubble, selection, insertion) to `O(n log n)` (shell, heap, merge, quick, C `qsort`) and `O(n)` integer sorts (counting, radix, bucket), plus the joke `sort_bogo`.
+- **Visualizer** — `sort_bubble_visual` calls an `AbsSortVis` hook on every swap for logs or animations.
+- **Benchmarking** — `timeit` times any sort on a deep-copied list without touching the original.
+- **Search** — `binary_search` for sorted lists, plus `is_sorted` and `list_copy` helpers.
 - **One umbrella header** — `abscom/abs.h` exposes the core modules and the dynamic runtime.
 
 ## Installation
@@ -257,7 +272,68 @@ print(v("mean:"), abs_stats_mean(data));  /* 22.50 */
 print(v("stdev:"), abs_stats_stdev(data));/* 10.90 */
 ```
 
-More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`, `sci_demo.c`) and are built as `build/examples/<name>`.
+### Exceptions, regex, and generators
+
+```c
+var g = range_gen(0, 6, 2);
+var n;
+while ((n = next(g)) != NULL && !is_none(n)) print(n);   /* 0 2 4 */
+
+print(re_sub(v("o"), v("0"), v("hello")));               /* hell0 */
+
+var result = None;
+try {
+    if (1 < 0) throw("impossible");
+    result = v(42);
+}
+catch (result) { print(v("Caught:"), result); }
+end_try;
+print(v("Result:"), result);                             /* 42 */
+```
+
+### Web server, events, memoization, and iterators
+
+```c
+static var api_home(var req) { (void)req; return v("<h1>Home</h1>"); }
+
+var app = Server(0);                     /* ephemeral port */
+route(app, "/", api_home);
+print(server_handle(app, "GET / HTTP/1.1"));   /* <h1>Home</h1> */
+/* server_run(app);                      /* blocking HTTP server */
+
+var bus = EventBus();
+on(bus, "login", my_login_handler);
+emit(bus, "login", v("Alice"));
+
+var f = memoize(heavy_calc);             /* cached calls */
+print(call_memoized(f, v(5)));
+
+var c = chain(List(), List());           /* itertools */
+print(iter_next(c));                     /* None once exhausted */
+```
+
+### Sorting, benchmarking, and binary search
+
+```c
+static void on_swap(var list, int idx_a, int idx_b) {
+    (void)idx_a; (void)idx_b;
+    print(list);                         /* log every step */
+}
+
+var data = List();
+for (int i = 0; i < 100; i++) append(data, v(rand() % 1000));
+
+print(v("bubble took:"), v(timeit(sort_bubble, data)), v("sec"));
+
+var small = List();
+append(small, v(50)); append(small, v(10)); append(small, v(40));
+sort_bubble_visual(small, on_swap);      /* [10, 40, 50] */
+
+sort_quick(data);                        /* in place */
+print(v("Found at index:"), v(binary_search(data, v(500))));
+```
+
+More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_demo.c`, `v6_demo.c`, `sci_demo.c`, `lang_demo.c`, `framework_demo.c`, `sort_demo.c`) and are built as `build/examples/<name>`.
 
 ## Documentation
 
@@ -315,6 +391,33 @@ More examples live in the `examples/` directory (`demo.c`, `py_demo.c`, `data_de
 | --- | --- |
 | [scientific.md](docs/scientific.md) | Matrices, statistics, advanced math, combinatorics, paths, CSV, and threading. |
 
+### Language features
+
+| Document | Description |
+| --- | --- |
+| [exceptions.md](docs/exceptions.md) | `try`/`catch`/`end_try`, `throw`, and `with` context managers. |
+| [regex.md](docs/regex.md) | `re_match`, `re_findall`, and `re_sub`. |
+| [datetime.md](docs/datetime.md) | `datetime_now`, `strftime_val`, and `timedelta`. |
+| [generators.md](docs/generators.md) | `range_gen` and `next`. |
+| [encoding-and-env.md](docs/encoding-and-env.md) | `base64_encode`, `uuid4`, `os_getenv`, and `os_setenv`. |
+
+### Framework
+
+| Document | Description |
+| --- | --- |
+| [web-server.md](docs/web-server.md) | `Server`, `route`, `server_handle`, and `server_run`. |
+| [events.md](docs/events.md) | `EventBus`, `on`, and `emit`. |
+| [plugins.md](docs/plugins.md) | `load_library` and `call_lib_func`. |
+| [functions.md](docs/functions.md) | `make_func`, `call_func`, `memoize`, `decorate`, and `func_meta`. |
+| [introspection.md](docs/introspection.md) | `id`, `repr`, and `dir`. |
+| [itertools.md](docs/itertools.md) | `chain`, `cycle`, and `iter_next`. |
+
+### Algorithm suite
+
+| Document | Description |
+| --- | --- |
+| [sorting.md](docs/sorting.md) | Twelve sorting algorithms, `sort_bubble_visual`, `timeit`, and `binary_search`. |
+
 ## Interface
 
 - **Core library** — include `<abscom/abs.h>` to get `abs_dynarray`, `abs_string`, `abs_hash`, `abs_hashmap`, `abs_time`, and `abs_fs` in one header.
@@ -336,6 +439,9 @@ graph TD
         fs[abs_fs - file I/O]
         rt[abs - Python-like runtime]
         sci[abs_* - matrices, stats, math, CSV, paths, threads]
+        lang[abs_except, abs_regex, abs_datetime, abs_gen, abs_encode, abs_env - language features]
+        fw[abs_server, abs_events, abs_plugins, abs_func, abs_introspect, abs_itertools - framework]
+        algo[abs_sort - sorting, benchmarking, binary search]
     end
 
     subgraph users["Consumers"]
@@ -351,6 +457,9 @@ graph TD
     fs --> common
     rt --> str
     sci --> rt
+    lang --> rt
+    fw --> rt
+    algo --> rt
     tests --> core
     examples --> core
 ```
@@ -363,6 +472,7 @@ See [docs/architecture.md](docs/architecture.md) for the full layout.
 - Meson (tested with 1.x) and Ninja for building from source.
 - Windows builds link `ws2_32`; POSIX builds use the standard socket and `clock_gettime` interfaces.
 - POSIX builds also link `m` and `pthread` for the scientific layer's math and threading.
+- Linux builds link `dl` for the plugin loader (`dlopen`/`dlsym`); macOS provides it through libSystem.
 - No third-party C library dependencies.
 
 ## Prerequisites
@@ -394,6 +504,9 @@ Run the example programs:
 ./build/examples/data_demo
 ./build/examples/v6_demo
 ./build/examples/sci_demo
+./build/examples/lang_demo
+./build/examples/framework_demo
+./build/examples/sort_demo
 ```
 
 See [docs/development.md](docs/development.md) for details.
