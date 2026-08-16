@@ -17,8 +17,6 @@
  * frames are masked and are unmasked on receipt.
  */
 
-#include "abscom/abs.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +31,8 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #endif
+
+#include "abscom/abs.h"
 
 #define WS_MAGIC "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 #define WS_MAX_FRAME (1u << 24) /* 16 MiB sanity cap for received frames */

@@ -5,8 +5,6 @@
  * server_handle() dispatches a single request line and is used by the tests.
  */
 
-#include "abscom/abs.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +22,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
+
+#include "abscom/abs.h"
 
 #define SERVER_BACKLOG 5
 

@@ -1,6 +1,3 @@
-#include "abscom/abs.h"
-#include "abscom/abs_string.h"
-
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -24,6 +21,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #endif
+
+#include "abscom/abs.h"
+#include "abscom/abs_string.h"
 
 #define POOL_BLOCK_SIZE 1024
 

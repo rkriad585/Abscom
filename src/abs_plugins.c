@@ -5,8 +5,6 @@
  * on Linux, or rely on libSystem on macOS where dlopen is always available).
  */
 
-#include "abscom/abs.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,6 +14,8 @@
 #else
 #include <dlfcn.h>
 #endif
+
+#include "abscom/abs.h"
 
 static char *dup_str(const char *s) {
     if (!s) s = "";

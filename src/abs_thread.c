@@ -1,5 +1,3 @@
-#include "abscom/abs.h"
-
 #include <stdlib.h>
 
 #ifdef _WIN32
@@ -7,6 +5,8 @@
 #else
 #include <pthread.h>
 #endif
+
+#include "abscom/abs.h"
 
 #ifdef _WIN32
 static DWORD WINAPI abs_thread_wrapper(LPVOID param) {
